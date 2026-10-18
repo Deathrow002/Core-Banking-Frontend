@@ -36,6 +36,55 @@ ng build
 
 This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
 
+## Docker
+
+The [Dockerfile](./Dockerfile) builds the production Angular application and runs its existing Node.js SSR server. The final image contains production dependencies and build output only, runs as the non-root `node` user, and checks `/login` for container health.
+
+Run these commands from the `Frontend` directory:
+
+```powershell
+docker build -t core-banking-frontend .
+docker run --rm --name core-banking-frontend -p 4200:4000 core-banking-frontend
+```
+
+Open `http://localhost:4200/login`. The server listens on container port `4000` by default; set `PORT` and adjust the port mapping if needed:
+
+```powershell
+docker run --rm --name core-banking-frontend -e PORT=8080 -p 4200:8080 core-banking-frontend
+```
+
+To build from the parent repository instead:
+
+```powershell
+docker build -t core-banking-frontend .\Frontend
+```
+
+### Authentication API routing
+
+The Angular development [proxy configuration](./proxy.conf.json) is only used by `npm start`; it is **not** included as a production reverse proxy. The container serves the UI and SSR output, not backend API requests.
+
+For a working containerized login, put a reverse proxy or ingress in front of the frontend and Authentication Service on a **single browser-facing origin**:
+
+- Route `/api/v1/auth/` to `authentication-service:8084`, preserving the request path.
+- Route other UI paths to the frontend on port `4000`.
+- Forward `Cookie`, `Set-Cookie`, and `X-XSRF-TOKEN` headers without stripping them.
+- If the proxy is also containerized, attach it and these services to a shared Docker network. Use service/container names, not `localhost`, for upstream addresses.
+
+This preserves the same-origin `SESSION` cookie and Angular CSRF handling. Directly publishing the frontend port lets you view the UI, but login requires the API routing above. For HTTPS deployments, enable secure session cookies in the backend.
+
+### Docker Compose
+
+From the parent Core-Banking repository, start the frontend and its authentication dependencies:
+
+```powershell
+docker compose up -d --build frontend-gateway
+docker compose ps
+```
+
+Open `http://localhost:8080/login`. Compose runs `frontend-service` internally on port `4000` and publishes `frontend-gateway` on port `8080`. The gateway forwards `/api/v1/auth/` to Authentication and other UI paths to the Angular server. Cookies and CSRF headers pass through on the same browser-facing origin; other `/api/` paths currently return `404`.
+
+The gateway waits for the frontend and Authentication Service health checks before starting. No Java command, Eureka registration, or GitHub build token is required by the frontend image. Existing backend build requirements still apply to dependencies started by Compose.
+
 ## Running unit tests
 
 To execute unit tests with the [Vitest](https://vitest.dev/) test runner, use the following command:
