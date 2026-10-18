@@ -99,7 +99,9 @@ docker compose up -d --build frontend-gateway
 docker compose ps
 ```
 
-Open `http://localhost:8080/login`. Compose runs `frontend-service` internally on port `4000` and publishes `frontend-gateway` on port `8080`. The gateway forwards `/api/v1/auth/` to Authentication and other UI paths to the Angular server. Cookies and CSRF headers pass through on the same browser-facing origin; other `/api/` paths currently return `404`.
+Open `http://localhost:8080/login`. Compose runs `frontend-service` internally on port `4000` and publishes `frontend-gateway` on port `8080`. The gateway forwards `/api/v1/auth/` to Authentication and UI paths to the Angular server. Cookies and CSRF headers pass through on the same browser-facing origin; unconfigured `/api/` paths return `404`.
+
+The gateway also forwards OAuth/OIDC endpoints and `/api/mobile/**` to the corresponding backend services. Angular still uses only session cookies + CSRF, not mobile bearer tokens; its `/login` page is unchanged. OAuth browser sign-in uses `/oauth/login`. See the [Authentication README](../Authentication/README.md) for the mobile PKCE client and Phase 1 money-operation restrictions. Start Transaction and Loan separately when testing their mobile routes: `docker compose up -d --build transaction-service loan-service`.
 
 The gateway waits for the frontend and Authentication Service health checks before starting. No Java command, Eureka registration, or GitHub build token is required by the frontend image. Existing backend build requirements still apply to dependencies started by Compose.
 
