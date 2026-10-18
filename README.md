@@ -12,6 +12,24 @@ ng serve
 
 Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
 
+## Default Admin Login (Local Development)
+
+Use the following default account on the login page:
+
+| Field | Value |
+|-------|-------|
+| Email | `admin@example.com` |
+| Password | `SecureAdminP@ssw0rd!` |
+| Role | `ADMIN` |
+
+The Authentication Service configures these values in its [application.properties](../Authentication/src/main/resources/application.properties):
+
+On startup, the backend creates this account with an encoded password only if the email does not already exist. Updating these properties does not reset an existing account's password.
+
+For local development, open `http://localhost:4200/login`; for Docker Compose, open `http://localhost:8080/login`. The Authentication Service and its dependencies must be running.
+
+**Do not use these public default credentials in production.** Supply unique admin credentials through backend environment variables or a secret manager, and replace the default account credentials before exposing the application. Do not put real credentials in Angular source code or frontend environment files.
+
 ## Code scaffolding
 
 Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
@@ -84,6 +102,8 @@ docker compose ps
 Open `http://localhost:8080/login`. Compose runs `frontend-service` internally on port `4000` and publishes `frontend-gateway` on port `8080`. The gateway forwards `/api/v1/auth/` to Authentication and other UI paths to the Angular server. Cookies and CSRF headers pass through on the same browser-facing origin; other `/api/` paths currently return `404`.
 
 The gateway waits for the frontend and Authentication Service health checks before starting. No Java command, Eureka registration, or GitHub build token is required by the frontend image. Existing backend build requirements still apply to dependencies started by Compose.
+
+The dependency chain also starts Kafka before Account, which is required by its Kafka listeners. The Angular SSR host allow-list includes `localhost`, `127.0.0.1`, and `frontend-service` for local Compose access and health checks. Add your actual public hostname to `security.allowedHosts` in [angular.json](./angular.json) and rebuild before deploying under a different hostname.
 
 ## Running unit tests
 
