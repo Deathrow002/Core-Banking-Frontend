@@ -16,11 +16,11 @@ Once the server is running, open your browser and navigate to `http://localhost:
 
 Use the following default account on the login page:
 
-| Field | Value |
-|-------|-------|
-| Email | `admin@example.com` |
+| Field    | Value                    |
+| -------- | ------------------------ |
+| Email    | `admin@example.com`    |
 | Password | `SecureAdminP@ssw0rd!` |
-| Role | `ADMIN` |
+| Role     | `ADMIN`                |
 
 The Authentication Service configures these values in its [application.properties](../Authentication/src/main/resources/application.properties):
 

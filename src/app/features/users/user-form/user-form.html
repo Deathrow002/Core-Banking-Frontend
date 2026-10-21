@@ -1,0 +1,136 @@
+<main class="users-page">
+  <section class="users-page__card users-page__card--narrow" aria-labelledby="user-form-title">
+    <header class="users-page__header">
+      <div>
+        <h1 id="user-form-title">{{ isEdit ? 'Edit user' : 'New user' }}</h1>
+        <p>
+          {{ isEdit ? 'Leave the password blank to keep it.' : 'Link a new login to an existing customer.' }}
+        </p>
+      </div>
+    </header>
+
+    @if (errorMessage(); as message) {
+      <div class="auth-alert" role="alert">{{ message }}</div>
+    }
+    @if (loading()) {
+      <p class="hint" aria-live="polite">Loading user…</p>
+    }
+
+    @if (ready()) {
+      <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
+        <div class="field">
+          <label for="customerId">Customer ID</label>
+          <input
+            id="customerId"
+            type="text"
+            formControlName="customerId"
+            autocomplete="off"
+            placeholder="00000000-0000-0000-0000-000000000000"
+            [attr.aria-invalid]="form.controls.customerId.invalid && form.controls.customerId.touched"
+            aria-describedby="customerId-hint customerId-error"
+          />
+          <small id="customerId-hint" class="field__hint">
+            {{ isEdit ? 'The customer link cannot be changed.' : 'Must be an existing customer.' }}
+          </small>
+          @if (form.controls.customerId.touched && form.controls.customerId.invalid) {
+            <small id="customerId-error" class="field__error">
+              {{ form.controls.customerId.hasError('required') ? 'Customer ID is required.' : 'Enter a valid customer ID (UUID).' }}
+            </small>
+          }
+        </div>
+
+        <div class="field">
+          <label for="email">Email</label>
+          <input
+            id="email"
+            type="email"
+            formControlName="email"
+            autocomplete="off"
+            placeholder="you@example.com"
+            [attr.aria-invalid]="form.controls.email.invalid && form.controls.email.touched"
+            aria-describedby="email-error"
+          />
+          @if (form.controls.email.touched && form.controls.email.invalid) {
+            <small id="email-error" class="field__error">
+              {{ form.controls.email.hasError('required') ? 'Email is required.' : 'Enter a valid email address.' }}
+            </small>
+          }
+        </div>
+
+        <div class="field">
+          <label for="password">{{ isEdit ? 'New password' : 'Password' }}</label>
+          <input
+            id="password"
+            type="password"
+            formControlName="password"
+            autocomplete="new-password"
+            [attr.aria-invalid]="form.controls.password.invalid && form.controls.password.touched"
+            aria-describedby="password-hint password-error"
+          />
+          <small id="password-hint" class="field__hint">
+            {{ isEdit ? 'Optional. ' : '' }}Between {{ minLength }} and {{ maxLength }} characters.
+          </small>
+          @if (form.controls.password.touched && form.controls.password.invalid) {
+            <small id="password-error" class="field__error">
+              {{ form.controls.password.hasError('required') ? 'Password is required.' : 'Password must be between ' + minLength + ' and ' + maxLength + ' characters.' }}
+            </small>
+          }
+        </div>
+
+        <div class="field">
+          <label for="confirmPassword">Confirm password</label>
+          <input
+            id="confirmPassword"
+            type="password"
+            formControlName="confirmPassword"
+            autocomplete="new-password"
+            [attr.aria-invalid]="form.controls.confirmPassword.touched && (form.controls.confirmPassword.hasError('required') || form.hasError('mismatch'))"
+            aria-describedby="confirmPassword-error"
+          />
+          @if (form.controls.confirmPassword.touched && form.controls.confirmPassword.hasError('required')) {
+            <small id="confirmPassword-error" class="field__error">Please confirm the password.</small>
+          } @else if (form.controls.confirmPassword.touched && form.hasError('mismatch')) {
+            <small id="confirmPassword-error" class="field__error">Passwords do not match.</small>
+          }
+        </div>
+
+        <div class="field">
+          <label for="role">Role</label>
+          <select id="role" formControlName="role" aria-describedby="role-hint">
+            @for (role of roleOptions(); track role) {
+              <option [value]="role">{{ role }}</option>
+            }
+          </select>
+          <small id="role-hint" class="field__hint">
+            @if (isSelf()) {
+              You cannot change your own role.
+            } @else if (!auth.hasRole('ADMIN')) {
+              Managers can assign every role except ADMIN.
+            } @else {
+              Administrators can assign any role.
+            }
+          </small>
+        </div>
+
+        @if (isEdit) {
+          <div class="field field--checkbox">
+            <label for="enabled">
+              <input id="enabled" type="checkbox" formControlName="enabled" />
+              Account enabled
+            </label>
+            @if (isSelf()) {
+              <small class="field__hint">You cannot disable your own account.</small>
+            }
+          </div>
+        }
+
+        <div class="form-actions">
+          <a class="button button--secondary" [routerLink]="cancelLink">Cancel</a>
+          <button type="submit" class="auth-submit" [disabled]="submitting() || !ready()">
+            {{ submitting() ? 'Saving…' : isEdit ? 'Save changes' : 'Create user' }}
+          </button>
+        </div>
+      </form>
+    }
+  </section>
+</main>

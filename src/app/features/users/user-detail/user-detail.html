@@ -1,0 +1,71 @@
+<main class="users-page">
+  <section class="users-page__card users-page__card--narrow" aria-labelledby="user-detail-title">
+    <header class="users-page__header">
+      <div>
+        <h1 id="user-detail-title">User details</h1>
+        <p><a routerLink="/users">Back to users</a></p>
+      </div>
+    </header>
+
+    @if (errorMessage(); as message) {
+      <div class="auth-alert" role="alert">{{ message }}</div>
+    }
+
+    @if (loading()) {
+      <p class="hint" aria-live="polite">Loading user…</p>
+    } @else if (user(); as user) {
+      <dl class="detail-list">
+        <dt>Email</dt>
+        <dd>
+          {{ user.email }}
+          @if (isSelf()) {
+            <span class="badge">You</span>
+          }
+        </dd>
+
+        <dt>Customer ID</dt>
+        <dd>{{ user.customerId }}</dd>
+
+        <dt>Role</dt>
+        <dd>{{ user.role }}</dd>
+
+        <dt>Status</dt>
+        <dd>
+          <span class="status" [class.status--off]="!user.enabled">
+            {{ user.enabled ? 'Active' : 'Disabled' }}
+          </span>
+        </dd>
+
+        <dt>Created</dt>
+        <dd>{{ user.createdAt | date: 'medium' }}</dd>
+      </dl>
+
+      <div class="form-actions">
+        @if (confirmingDelete()) {
+          <span>Delete this user permanently?</span>
+          <button type="button" class="button button--secondary" [disabled]="deleting()" (click)="confirmingDelete.set(false)">
+            Cancel
+          </button>
+          <button type="button" class="button button--danger" [disabled]="deleting()" (click)="confirmDelete()">
+            {{ deleting() ? 'Deleting…' : 'Confirm delete' }}
+          </button>
+        } @else {
+          @if (canDelete) {
+            <button
+              type="button"
+              class="button button--secondary"
+              [disabled]="isSelf()"
+              [attr.title]="isSelf() ? 'You cannot delete your own account.' : null"
+              (click)="confirmingDelete.set(true)"
+            >
+              Delete
+            </button>
+          }
+          @if (canEdit) {
+            <a class="button" [routerLink]="['/users', user.id, 'edit']">Edit</a>
+          }
+        }
+      </div>
+    }
+  </section>
+</main>

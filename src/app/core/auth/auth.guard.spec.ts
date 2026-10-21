@@ -3,7 +3,7 @@ import { HttpTestingController, provideHttpClientTesting } from '@angular/common
 import { TestBed } from '@angular/core/testing';
 import { ActivatedRouteSnapshot, provideRouter, Router, RouterStateSnapshot, UrlTree } from '@angular/router';
 import { firstValueFrom, Observable } from 'rxjs';
-import { authGuard, guestGuard } from './auth.guard';
+import { authGuard, guestGuard, staffGuard } from './auth.guard';
 import { authInterceptor } from './auth.interceptor';
 import { AUTH_API, AuthService } from './auth.service';
 
@@ -25,9 +25,9 @@ describe('session guards and interceptor', () => {
 
   afterEach(() => http.verify());
 
-  function runGuard(guard: typeof authGuard, url = '/home') {
+  function runGuard(guard: typeof authGuard, url = '/home', data: Record<string, unknown> = {}) {
     const result = TestBed.runInInjectionContext(() =>
-      guard({} as ActivatedRouteSnapshot, { url } as RouterStateSnapshot),
+      guard({ data } as unknown as ActivatedRouteSnapshot, { url } as RouterStateSnapshot),
     ) as Observable<boolean | UrlTree>;
     return firstValueFrom(result);
   }
@@ -55,6 +55,51 @@ describe('session guards and interceptor', () => {
     signIn();
 
     expect(router.serializeUrl((await runGuard(guestGuard, '/login')) as UrlTree)).toBe('/home');
+  });
+
+  it('staffGuard sends anonymous users to login with returnUrl', async () => {
+    const result = runGuard(staffGuard, '/sign-up');
+    http.expectOne(AUTH_API.me).flush(null, { status: 401, statusText: 'Unauthorized' });
+
+    expect(router.serializeUrl((await result) as UrlTree)).toBe('/login?returnUrl=%2Fsign-up');
+  });
+
+  it('staffGuard sends signed-in non-staff users home', async () => {
+    const result = runGuard(staffGuard, '/sign-up');
+    http.expectOne(AUTH_API.me).flush({ username: 'a@b.com', customerId: null, roles: ['ROLE_CUSTOMER'] });
+
+    expect(router.serializeUrl((await result) as UrlTree)).toBe('/home');
+  });
+
+  it('staffGuard allows MANAGER sessions', async () => {
+    const result = runGuard(staffGuard, '/sign-up');
+    http.expectOne(AUTH_API.me).flush({ username: 'm@b.com', customerId: null, roles: ['ROLE_MANAGER'] });
+
+    expect(await result).toBe(true);
+  });
+
+  it('staffGuard sends staff without the route permission home', async () => {
+    const result = runGuard(staffGuard, '/users/u1/edit', { permission: 'PERM_EDIT' });
+    http.expectOne(AUTH_API.me).flush({
+      username: 'm@b.com',
+      customerId: null,
+      roles: ['ROLE_MANAGER'],
+      permissions: ['PERM_ADD'],
+    });
+
+    expect(router.serializeUrl((await result) as UrlTree)).toBe('/home');
+  });
+
+  it('staffGuard allows staff with the route permission', async () => {
+    const result = runGuard(staffGuard, '/users/new', { permission: 'PERM_ADD' });
+    http.expectOne(AUTH_API.me).flush({
+      username: 'm@b.com',
+      customerId: null,
+      roles: ['ROLE_MANAGER'],
+      permissions: ['PERM_ADD', 'PERM_EDIT'],
+    });
+
+    expect(await result).toBe(true);
   });
 
   it('clears the session and redirects to login when an API call returns 401', () => {

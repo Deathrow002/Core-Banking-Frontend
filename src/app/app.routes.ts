@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
-import { authGuard, guestGuard } from './core/auth/auth.guard';
+import { authGuard, guestGuard, staffGuard } from './core/auth/auth.guard';
+import { PERMISSIONS } from './core/auth/auth.models';
 
 export const routes: Routes = [
   { path: '', pathMatch: 'full', redirectTo: 'home' },
@@ -8,6 +9,39 @@ export const routes: Routes = [
     title: 'Sign in | Core Banking',
     canActivate: [guestGuard],
     loadComponent: () => import('./features/auth/login/login').then((m) => m.Login),
+  },
+  {
+    path: 'sign-up',
+    title: 'Create login | Core Banking',
+    canActivate: [staffGuard],
+    data: { permission: PERMISSIONS.add },
+    loadComponent: () => import('./features/auth/sign-up/sign-up').then((m) => m.SignUp),
+  },
+  {
+    path: 'users',
+    title: 'Users | Core Banking',
+    canActivate: [staffGuard],
+    loadComponent: () => import('./features/users/user-list/user-list').then((m) => m.UserList),
+  },
+  {
+    path: 'users/new',
+    title: 'New user | Core Banking',
+    canActivate: [staffGuard],
+    data: { permission: PERMISSIONS.add },
+    loadComponent: () => import('./features/users/user-form/user-form').then((m) => m.UserForm),
+  },
+  {
+    path: 'users/:id',
+    title: 'User details | Core Banking',
+    canActivate: [staffGuard],
+    loadComponent: () => import('./features/users/user-detail/user-detail').then((m) => m.UserDetail),
+  },
+  {
+    path: 'users/:id/edit',
+    title: 'Edit user | Core Banking',
+    canActivate: [staffGuard],
+    data: { permission: PERMISSIONS.edit },
+    loadComponent: () => import('./features/users/user-form/user-form').then((m) => m.UserForm),
   },
   {
     path: 'home',

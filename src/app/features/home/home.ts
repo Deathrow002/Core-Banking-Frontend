@@ -1,9 +1,11 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
+import { PERMISSIONS } from '../../core/auth/auth.models';
 import { AuthService } from '../../core/auth/auth.service';
 
 @Component({
   selector: 'app-home',
+  imports: [RouterLink],
   template: `
     <main class="home">
       <header class="home__bar">
@@ -14,6 +16,14 @@ import { AuthService } from '../../core/auth/auth.service';
         <h1>Welcome, {{ auth.currentUser() }}</h1>
         @if (auth.roles().length) {
           <p>Roles: {{ auth.roles().join(', ') }}</p>
+        }
+        @if (auth.isStaff()) {
+          <nav class="home__staff" aria-label="Staff tools">
+            <a routerLink="/users">Manage users</a>
+            @if (auth.hasPermission(permissions.add)) {
+              <a routerLink="/sign-up">Create login</a>
+            }
+          </nav>
         }
       </section>
     </main>
@@ -38,11 +48,21 @@ import { AuthService } from '../../core/auth/auth.service';
     .home__content {
       padding: 2rem 1.5rem;
     }
+    .home__staff {
+      display: flex;
+      gap: 1rem;
+      margin-top: 1rem;
+    }
+    .home__staff a {
+      color: #0b3d5c;
+      font-weight: 600;
+    }
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class Home {
   protected readonly auth = inject(AuthService);
+  protected readonly permissions = PERMISSIONS;
   private readonly router = inject(Router);
 
   protected logout(): void {

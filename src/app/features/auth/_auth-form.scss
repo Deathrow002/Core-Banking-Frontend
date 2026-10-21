@@ -1,0 +1,150 @@
+.auth-page {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 1.5rem;
+  background: linear-gradient(135deg, #0b3d5c 0%, #1a6e8e 100%);
+}
+
+.auth-card {
+  width: 100%;
+  max-width: 400px;
+  padding: 2.5rem 2rem;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 20px 45px rgb(0 0 0 / 20%);
+
+  &__header {
+    text-align: center;
+    margin-bottom: 1.5rem;
+
+    h1 {
+      margin: 0.75rem 0 0.25rem;
+      font-size: 1.5rem;
+      color: #0b3d5c;
+    }
+
+    p {
+      margin: 0;
+      color: #5f6b7a;
+      font-size: 0.9rem;
+    }
+  }
+
+  &__logo {
+    display: inline-grid;
+    place-items: center;
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: #0b3d5c;
+    color: #fff;
+    font-weight: 700;
+  }
+
+  &__footer {
+    margin: 1.5rem 0 0;
+    text-align: center;
+    font-size: 0.8rem;
+    color: #8a94a3;
+
+    a {
+      color: #1a6e8e;
+      font-weight: 600;
+    }
+  }
+}
+
+.auth-alert {
+  margin-bottom: 1rem;
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  background: #fdecea;
+  color: #b3261e;
+  font-size: 0.875rem;
+
+  &--success {
+    background: #e6f4ea;
+    color: #1e6b34;
+  }
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+  margin-bottom: 1rem;
+
+  label {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #2d3748;
+  }
+
+  input {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 0.7rem 0.85rem;
+    border: 1px solid #cbd5e0;
+    border-radius: 8px;
+    font-size: 1rem;
+
+    &:focus {
+      outline: none;
+      border-color: #1a6e8e;
+      box-shadow: 0 0 0 3px rgb(26 110 142 / 20%);
+    }
+
+    &[aria-invalid='true'] {
+      border-color: #b3261e;
+    }
+  }
+
+  &__password {
+    position: relative;
+
+    input {
+      padding-right: 4rem;
+    }
+  }
+
+  &__toggle {
+    position: absolute;
+    top: 50%;
+    right: 0.5rem;
+    transform: translateY(-50%);
+    border: none;
+    background: none;
+    color: #1a6e8e;
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  &__error {
+    color: #b3261e;
+    font-size: 0.8rem;
+  }
+}
+
+.auth-submit {
+  width: 100%;
+  margin-top: 0.5rem;
+  padding: 0.8rem;
+  border: none;
+  border-radius: 8px;
+  background: #0b3d5c;
+  color: #fff;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+
+  &:hover:not(:disabled) {
+    background: #145574;
+  }
+
+  &:disabled {
+    opacity: 0.7;
+    cursor: progress;
+  }
+}

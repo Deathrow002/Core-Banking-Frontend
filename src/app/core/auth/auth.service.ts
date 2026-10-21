@@ -12,14 +12,19 @@ import {
   tap,
   throwError,
 } from 'rxjs';
-import { LoginCredentials, SessionUser } from './auth.models';
+import { LoginCredentials, Permission, RegisteredUser, SessionUser, SignUpPayload } from './auth.models';
 
 export const AUTH_API = {
   csrf: '/api/v1/auth/csrf',
   login: '/api/v1/auth/login',
   me: '/api/v1/auth/me',
   logout: '/api/v1/auth/logout',
+  register: '/api/v1/auth/register',
+  users: '/api/v1/auth/users',
 } as const;
+
+/** Roles allowed to create logins for customers. Mirrors the backend @PreAuthorize on register. */
+export const STAFF_ROLES: readonly string[] = ['ROLE_ADMIN', 'ROLE_MANAGER'];
 
 /**
  * Server-side session auth: the backend keeps the session in Redis and the browser
@@ -37,11 +42,17 @@ export class AuthService {
   readonly currentUser = computed(() => this.user()?.username ?? null);
   readonly customerId = computed(() => this.user()?.customerId ?? null);
   readonly roles = computed(() => this.user()?.roles ?? []);
+  readonly permissions = computed(() => this.user()?.permissions ?? []);
   readonly isAuthenticated = computed(() => this.user() !== null);
 
   hasRole(role: string): boolean {
     const normalized = role.startsWith('ROLE_') ? role : `ROLE_${role}`;
     return this.roles().includes(normalized);
+  }
+
+  /** Mirrors the backend hasAuthority('PERM_*') checks on create, update and delete. */
+  hasPermission(permission: Permission): boolean {
+    return this.permissions().includes(permission);
   }
 
   /** Resolves whether the browser has a live server session, calling GET /me at most once. */
@@ -74,6 +85,20 @@ export class AuthService {
         this.user.set(user);
         this.sessionCheck$ = null;
       }),
+    );
+  }
+
+  isStaff(): boolean {
+    return STAFF_ROLES.some((role) => this.roles().includes(role));
+  }
+
+  /**
+   * Creates a login for an existing customer. Requires an ADMIN or MANAGER session;
+   * primes CSRF first like login does, then posts JSON.
+   */
+  register(payload: SignUpPayload): Observable<RegisteredUser> {
+    return this.http.get<void>(AUTH_API.csrf).pipe(
+      switchMap(() => this.http.post<RegisteredUser>(AUTH_API.register, payload)),
     );
   }
 

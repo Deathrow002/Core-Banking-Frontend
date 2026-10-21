@@ -66,7 +66,7 @@ describe('Login', () => {
     fill(el, 'jane@bank.com', 'secret');
 
     el.querySelector<HTMLButtonElement>('button[type=submit]')!.click();
-    answerLogin({ username: 'jane@bank.com', customerId: 'c-1', roles: ['ROLE_USER'] });
+    answerLogin({ username: 'jane@bank.com', customerId: 'c-1', roles: ['ROLE_CUSTOMER'] });
     await fixture.whenStable();
 
     expect(navigate).toHaveBeenCalledWith('/home');
