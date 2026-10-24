@@ -11,6 +11,7 @@ const CUSTOMER = {
   email: 'ada@bank.com',
 };
 const PAGE = { content: [CUSTOMER], totalElements: 1, totalPages: 1, number: 0, size: 10 };
+const LOOKUPS = { accountTypes: ['SAVING', 'CURRENT'], currencyTypes: ['THB', 'USD'] };
 
 describe('AccountCreate', () => {
   let fixture: ComponentFixture<AccountCreate>;
@@ -27,12 +28,26 @@ describe('AccountCreate', () => {
     fixture = TestBed.createComponent(AccountCreate);
     http = TestBed.inject(HttpTestingController);
     el = fixture.nativeElement as HTMLElement;
+    http.expectOne('/accounts/lookups').flush(LOOKUPS);
     fixture.detectChanges();
   });
 
   afterEach(() => {
     http.verify();
     vi.useRealTimers();
+  });
+
+  it('offers the account types and currencies returned by the lookup service', () => {
+    const options = (id: string) =>
+      Array.from(el.querySelectorAll<HTMLOptionElement>(`#${id} option`)).map((o) => o.value);
+
+    expect(options('accountType')).toEqual(['SAVING', 'CURRENT']);
+    expect(options('currency')).toEqual(['THB', 'USD']);
+  });
+
+  it('keeps submit disabled until a customer is selected', () => {
+    const button = el.querySelector<HTMLButtonElement>('button[type="submit"]');
+    expect(button?.disabled).toBe(true);
   });
 
   function typeInSearch(text: string): void {

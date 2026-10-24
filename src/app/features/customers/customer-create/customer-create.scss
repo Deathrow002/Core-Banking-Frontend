@@ -1,0 +1,38 @@
+@use '../../auth/auth-form';
+@use '../../users/users';
+
+.customer-create {
+  &__addresses {
+    margin: 0 0 1rem;
+    padding: 0.75rem;
+    border: 1px solid #c9d1d9;
+    border-radius: 6px;
+
+    legend {
+      font-weight: 600;
+      padding: 0 0.25rem;
+    }
+  }
+
+  &__address {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+
+    & + & {
+      margin-top: 1rem;
+      padding-top: 1rem;
+      border-top: 1px solid #e5e9ee;
+    }
+  }
+
+  &__address-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  &__add {
+    margin-top: 1rem;
+  }
+}

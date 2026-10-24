@@ -1,7 +1,7 @@
 import { HttpErrorResponse, provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
-import { Account, AccountCreatePayload } from './account.models';
+import { Account, AccountCreatePayload, AccountLookups } from './account.models';
 import { AccountService, toAccountErrorMessage } from './account.service';
 
 const CUSTOMER_ID = '3f2b8c1e-9a4d-4e7b-8f1a-2c3d4e5f6a7b';
@@ -26,6 +26,16 @@ describe('AccountService', () => {
   });
 
   afterEach(() => http.verify());
+
+  it('loads account type and currency codes without priming CSRF', () => {
+    let result: AccountLookups | undefined;
+    service.lookups().subscribe((lookups) => (result = lookups));
+
+    const req = http.expectOne('/accounts/lookups');
+    expect(req.request.method).toBe('GET');
+    req.flush({ accountTypes: ['SAVING'], currencyTypes: ['THB'] });
+    expect(result).toEqual({ accountTypes: ['SAVING'], currencyTypes: ['THB'] });
+  });
 
   it('primes CSRF before creating an account', () => {
     let result: Account | undefined;

@@ -22,6 +22,7 @@ import { AuthService } from '../../core/auth/auth.service';
             <a routerLink="/users">Manage users</a>
             @if (auth.hasPermission(permissions.add)) {
               <a routerLink="/accounts/new">Create account</a>
+              <a routerLink="/customers/new">Create customer</a>
             }
           </nav>
         }

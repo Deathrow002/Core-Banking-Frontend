@@ -46,6 +46,14 @@ export const routes: Routes = [
       import('./features/accounts/account-create/account-create').then((m) => m.AccountCreate),
   },
   {
+    path: 'customers/new',
+    title: 'New customer | Core Banking',
+    canActivate: [staffGuard],
+    data: { permission: PERMISSIONS.add },
+    loadComponent: () =>
+      import('./features/customers/customer-create/customer-create').then((m) => m.CustomerCreate),
+  },
+  {
     path: 'home',
     title: 'Home | Core Banking',
     canActivate: [authGuard],

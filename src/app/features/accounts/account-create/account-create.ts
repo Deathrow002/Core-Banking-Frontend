@@ -17,21 +17,15 @@ import {
   of,
   switchMap,
 } from 'rxjs';
-import {
-  ACCOUNT_TYPES,
-  Account,
-  AccountType,
-  CURRENCY_TYPES,
-  CurrencyType,
-} from '../../../core/accounts/account.models';
+import { Account } from '../../../core/accounts/account.models';
 import { AccountService, toAccountErrorMessage } from '../../../core/accounts/account.service';
 import { CustomerSummary } from '../../../core/customers/customer.models';
 import { CustomerService, toCustomerErrorMessage } from '../../../core/customers/customer.service';
 
 const MIN_QUERY_LENGTH = 2;
 const SEARCH_DEBOUNCE_MS = 300;
-const DEFAULT_ACCOUNT_TYPE: AccountType = 'SAVING';
-const DEFAULT_CURRENCY: CurrencyType = 'THB';
+const DEFAULT_ACCOUNT_TYPE = 'SAVING';
+const DEFAULT_CURRENCY = 'THB';
 
 @Component({
   selector: 'app-account-create',
@@ -44,8 +38,10 @@ export class AccountCreate {
   private readonly accounts = inject(AccountService);
   private readonly customers = inject(CustomerService);
 
-  protected readonly accountTypes = ACCOUNT_TYPES;
-  protected readonly currencyTypes = CURRENCY_TYPES;
+  protected readonly accountTypes = signal<string[]>([]);
+  protected readonly currencyTypes = signal<string[]>([]);
+  protected readonly lookupsLoaded = signal(false);
+  protected readonly lookupError = signal<string | null>(null);
   protected readonly minQueryLength = MIN_QUERY_LENGTH;
 
   protected readonly search = new FormControl('', { nonNullable: true });
@@ -66,6 +62,25 @@ export class AccountCreate {
   protected readonly created = signal<Account | null>(null);
 
   constructor() {
+    this.accounts
+      .lookups()
+      .pipe(takeUntilDestroyed())
+      .subscribe({
+        next: (lookups) => {
+          this.accountTypes.set(lookups.accountTypes);
+          this.currencyTypes.set(lookups.currencyTypes);
+          this.form.patchValue(this.defaultValues());
+          this.lookupsLoaded.set(true);
+        },
+        error: (error: unknown) =>
+          this.lookupError.set(
+            toAccountErrorMessage(
+              error,
+              'Could not load account types and currencies. Please try again.',
+            ),
+          ),
+      });
+
     this.search.valueChanges
       .pipe(
         map((query) => query.trim()),
@@ -146,10 +161,22 @@ export class AccountCreate {
   }
 
   private resetForm(): void {
-    this.form.reset();
+    this.form.reset(this.defaultValues());
     this.selected.set(null);
     this.results.set(null);
     this.searchError.set(null);
     this.search.setValue('');
   }
+
+  /** Prefers the usual defaults, falling back to the first code the lookup tables provide. */
+  private defaultValues(): { accountType: string; currency: string } {
+    return {
+      accountType: pickDefault(this.accountTypes(), DEFAULT_ACCOUNT_TYPE),
+      currency: pickDefault(this.currencyTypes(), DEFAULT_CURRENCY),
+    };
+  }
+}
+
+function pickDefault(options: string[], preferred: string): string {
+  return options.includes(preferred) ? preferred : (options[0] ?? preferred);
 }

@@ -2,16 +2,21 @@ import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { Observable, switchMap } from 'rxjs';
 import { AUTH_API } from '../auth/auth.service';
-import { Account, AccountCreatePayload } from './account.models';
+import { Account, AccountCreatePayload, AccountLookups } from './account.models';
 
 export const ACCOUNT_API = {
   create: '/accounts/createAccount',
+  lookups: '/accounts/lookups',
 };
 
 /** Talks to the Account service through the gateway. Mutations prime CSRF first, like UserManagementService does. */
 @Injectable({ providedIn: 'root' })
 export class AccountService {
   private readonly http = inject(HttpClient);
+
+  lookups(): Observable<AccountLookups> {
+    return this.http.get<AccountLookups>(ACCOUNT_API.lookups);
+  }
 
   create(payload: AccountCreatePayload): Observable<Account> {
     return this.http
