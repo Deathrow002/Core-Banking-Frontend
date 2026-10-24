@@ -8,8 +8,19 @@ import {
 } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { finalize, Observable } from 'rxjs';
-import { ManagedUser, UserCreatePayload, UserRole, UserUpdatePayload } from '../../../core/auth/auth.models';
+import {
+  ManagedUser,
+  UserCreatePayload,
+  UserRole,
+  UserUpdatePayload,
+} from '../../../core/auth/auth.models';
 import { AuthService } from '../../../core/auth/auth.service';
+import {
+  PASSWORD_LENGTH_RULES,
+  PASSWORD_MAX_LENGTH,
+  PASSWORD_MIN_LENGTH,
+  UUID_PATTERN,
+} from '../../../core/auth/auth.validators';
 import {
   ADMIN_ROLE,
   assignableRoles,
@@ -17,11 +28,6 @@ import {
   toUserErrorMessage,
   UserManagementService,
 } from '../../../core/users/user-management.service';
-
-const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-/** Mirrors the backend password limits in UserCreatePayload / UserUpdatePayload. */
-const PASSWORD_MIN_LENGTH = 8;
-const PASSWORD_MAX_LENGTH = 72;
 
 function passwordsMatch(group: AbstractControl): ValidationErrors | null {
   const password = group.get('password')?.value ?? '';
@@ -56,16 +62,11 @@ export class UserForm {
 
   protected readonly form = inject(NonNullableFormBuilder).group(
     {
-      customerId: [
-        '',
-        this.isEdit ? [] : [Validators.required, Validators.pattern(UUID_PATTERN)],
-      ],
+      customerId: ['', this.isEdit ? [] : [Validators.required, Validators.pattern(UUID_PATTERN)]],
       email: ['', [Validators.required, Validators.email]],
       password: [
         '',
-        this.isEdit
-          ? [Validators.minLength(PASSWORD_MIN_LENGTH), Validators.maxLength(PASSWORD_MAX_LENGTH)]
-          : [Validators.required, Validators.minLength(PASSWORD_MIN_LENGTH), Validators.maxLength(PASSWORD_MAX_LENGTH)],
+        this.isEdit ? PASSWORD_LENGTH_RULES : [Validators.required, ...PASSWORD_LENGTH_RULES],
       ],
       confirmPassword: ['', this.isEdit ? [] : [Validators.required]],
       role: [CUSTOMER_ROLE, [Validators.required]],
@@ -141,13 +142,13 @@ export class UserForm {
   private run(request: Observable<ManagedUser>): void {
     this.submitting.set(true);
 
-    request
-      .pipe(finalize(() => this.submitting.set(false)))
-      .subscribe({
-        next: (saved) => this.router.navigate(['/users', saved.id]),
-        error: (error: unknown) =>
-          this.errorMessage.set(toUserErrorMessage(error, 'Could not save the user. Please try again.')),
-      });
+    request.pipe(finalize(() => this.submitting.set(false))).subscribe({
+      next: (saved) => this.router.navigate(['/users', saved.id]),
+      error: (error: unknown) =>
+        this.errorMessage.set(
+          toUserErrorMessage(error, 'Could not save the user. Please try again.'),
+        ),
+    });
   }
 
   private loadRoles(): void {
@@ -157,7 +158,9 @@ export class UserForm {
         this.rolesLoaded.set(true);
       },
       error: (error: unknown) =>
-        this.errorMessage.set(toUserErrorMessage(error, 'Could not load the roles. Please try again.')),
+        this.errorMessage.set(
+          toUserErrorMessage(error, 'Could not load the roles. Please try again.'),
+        ),
     });
   }
 
@@ -186,7 +189,9 @@ export class UserForm {
           this.userLoaded.set(true);
         },
         error: (error: unknown) =>
-          this.errorMessage.set(toUserErrorMessage(error, 'Could not load the user. Please try again.')),
+          this.errorMessage.set(
+            toUserErrorMessage(error, 'Could not load the user. Please try again.'),
+          ),
       });
   }
 }

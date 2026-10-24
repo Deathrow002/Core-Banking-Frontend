@@ -12,18 +12,17 @@ import {
   tap,
   throwError,
 } from 'rxjs';
-import { LoginCredentials, Permission, RegisteredUser, SessionUser, SignUpPayload } from './auth.models';
+import { LoginCredentials, Permission, SessionUser } from './auth.models';
 
 export const AUTH_API = {
   csrf: '/api/v1/auth/csrf',
   login: '/api/v1/auth/login',
   me: '/api/v1/auth/me',
   logout: '/api/v1/auth/logout',
-  register: '/api/v1/auth/register',
   users: '/api/v1/auth/users',
 } as const;
 
-/** Roles allowed to create logins for customers. Mirrors the backend @PreAuthorize on register. */
+/** Roles that can open the staff area (user management). */
 export const STAFF_ROLES: readonly string[] = ['ROLE_ADMIN', 'ROLE_MANAGER'];
 
 /**
@@ -90,16 +89,6 @@ export class AuthService {
 
   isStaff(): boolean {
     return STAFF_ROLES.some((role) => this.roles().includes(role));
-  }
-
-  /**
-   * Creates a login for an existing customer. Requires an ADMIN or MANAGER session;
-   * primes CSRF first like login does, then posts JSON.
-   */
-  register(payload: SignUpPayload): Observable<RegisteredUser> {
-    return this.http.get<void>(AUTH_API.csrf).pipe(
-      switchMap(() => this.http.post<RegisteredUser>(AUTH_API.register, payload)),
-    );
   }
 
   /** Invalidates the server session; local state is cleared even if the call fails. */

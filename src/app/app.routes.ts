@@ -11,13 +11,6 @@ export const routes: Routes = [
     loadComponent: () => import('./features/auth/login/login').then((m) => m.Login),
   },
   {
-    path: 'sign-up',
-    title: 'Create login | Core Banking',
-    canActivate: [staffGuard],
-    data: { permission: PERMISSIONS.add },
-    loadComponent: () => import('./features/auth/sign-up/sign-up').then((m) => m.SignUp),
-  },
-  {
     path: 'users',
     title: 'Users | Core Banking',
     canActivate: [staffGuard],
@@ -34,7 +27,8 @@ export const routes: Routes = [
     path: 'users/:id',
     title: 'User details | Core Banking',
     canActivate: [staffGuard],
-    loadComponent: () => import('./features/users/user-detail/user-detail').then((m) => m.UserDetail),
+    loadComponent: () =>
+      import('./features/users/user-detail/user-detail').then((m) => m.UserDetail),
   },
   {
     path: 'users/:id/edit',

@@ -92,7 +92,9 @@ export class UserList {
           this.load();
         },
         error: (error: unknown) =>
-          this.errorMessage.set(toUserErrorMessage(error, 'Could not delete the user. Please try again.')),
+          this.errorMessage.set(
+            toUserErrorMessage(error, 'Could not delete the user. Please try again.'),
+          ),
       });
   }
 
@@ -106,7 +108,9 @@ export class UserList {
       .subscribe({
         next: (page) => this.data.set(page),
         error: (error: unknown) =>
-          this.errorMessage.set(toUserErrorMessage(error, 'Could not load users. Please try again.')),
+          this.errorMessage.set(
+            toUserErrorMessage(error, 'Could not load users. Please try again.'),
+          ),
       });
   }
 }

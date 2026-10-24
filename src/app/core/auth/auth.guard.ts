@@ -18,7 +18,7 @@ export const authGuard: CanActivateFn = (_route, state) => {
 
 /**
  * Requires a live session with an ADMIN or MANAGER role; other signed-in users go home.
- * A route can also require a permission with `data: { permission: PERMISSIONS.add }`.
+ * A route can narrow this with `data: { permission: PERMISSIONS.add }`.
  */
 export const staffGuard: CanActivateFn = (route, state) => {
   const router = inject(Router);

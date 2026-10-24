@@ -39,7 +39,9 @@ describe('AuthService', () => {
     const first = firstValueFrom(service.ensureSession());
     const second = firstValueFrom(service.ensureSession());
 
-    http.expectOne(AUTH_API.me).flush({ username: 'a@b.com', customerId: null, roles: ['ROLE_CUSTOMER'] });
+    http
+      .expectOne(AUTH_API.me)
+      .flush({ username: 'a@b.com', customerId: null, roles: ['ROLE_CUSTOMER'] });
 
     expect(await first).toBe(true);
     expect(await second).toBe(true);
@@ -68,31 +70,20 @@ describe('AuthService', () => {
     expect(service.isAuthenticated()).toBe(false);
   });
 
-  it('primes CSRF then posts the sign-up payload as JSON', async () => {
-    const result = firstValueFrom(
-      service.register({ customerId: 'c-9', email: 'new@bank.com', password: 'longenough' }),
-    );
-
-    http.expectOne(AUTH_API.csrf).flush(null, { status: 204, statusText: 'No Content' });
-    const req = http.expectOne(AUTH_API.register);
-    expect(req.request.method).toBe('POST');
-    expect(req.request.body).toEqual({ customerId: 'c-9', email: 'new@bank.com', password: 'longenough' });
-    req.flush({ email: 'new@bank.com', customerId: 'c-9', role: 'CUSTOMER' });
-
-    expect(await result).toEqual({ email: 'new@bank.com', customerId: 'c-9', role: 'CUSTOMER' });
-    expect(service.isAuthenticated()).toBe(false);
-  });
-
   it('isStaff is true only for ADMIN or MANAGER sessions', () => {
     service.login({ email: 'a@b.com', password: 'x' }).subscribe();
     http.expectOne(AUTH_API.csrf).flush(null);
-    http.expectOne(AUTH_API.login).flush({ username: 'a@b.com', customerId: null, roles: ['ROLE_CUSTOMER'] });
+    http
+      .expectOne(AUTH_API.login)
+      .flush({ username: 'a@b.com', customerId: null, roles: ['ROLE_CUSTOMER'] });
     expect(service.isStaff()).toBe(false);
 
     service.clear();
     service.login({ email: 'a@b.com', password: 'x' }).subscribe();
     http.expectOne(AUTH_API.csrf).flush(null);
-    http.expectOne(AUTH_API.login).flush({ username: 'a@b.com', customerId: null, roles: ['ROLE_MANAGER'] });
+    http
+      .expectOne(AUTH_API.login)
+      .flush({ username: 'a@b.com', customerId: null, roles: ['ROLE_MANAGER'] });
     expect(service.isStaff()).toBe(true);
   });
 

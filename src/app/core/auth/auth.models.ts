@@ -21,20 +21,6 @@ export interface LoginCredentials {
   password: string;
 }
 
-/** Mirrors com.authentication.models.request.UserRegisPayload */
-export interface SignUpPayload {
-  customerId: string;
-  email: string;
-  password: string;
-}
-
-/** Mirrors com.authentication.models.response.RegisteredUserResponse */
-export interface RegisteredUser {
-  email: string;
-  customerId: string;
-  role: string;
-}
-
 /** A role name from the backend roles table (for example CUSTOMER, MANAGER, ADMIN). */
 export type UserRole = string;
 
