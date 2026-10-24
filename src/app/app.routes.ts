@@ -38,6 +38,14 @@ export const routes: Routes = [
     loadComponent: () => import('./features/users/user-form/user-form').then((m) => m.UserForm),
   },
   {
+    path: 'accounts/new',
+    title: 'New account | Core Banking',
+    canActivate: [staffGuard],
+    data: { permission: PERMISSIONS.add },
+    loadComponent: () =>
+      import('./features/accounts/account-create/account-create').then((m) => m.AccountCreate),
+  },
+  {
     path: 'home',
     title: 'Home | Core Banking',
     canActivate: [authGuard],

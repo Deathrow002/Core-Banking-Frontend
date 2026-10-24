@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
+import { PERMISSIONS } from '../../core/auth/auth.models';
 import { AuthService } from '../../core/auth/auth.service';
 
 @Component({
@@ -19,6 +20,9 @@ import { AuthService } from '../../core/auth/auth.service';
         @if (auth.isStaff()) {
           <nav class="home__staff" aria-label="Staff tools">
             <a routerLink="/users">Manage users</a>
+            @if (auth.hasPermission(permissions.add)) {
+              <a routerLink="/accounts/new">Create account</a>
+            }
           </nav>
         }
       </section>
@@ -58,6 +62,7 @@ import { AuthService } from '../../core/auth/auth.service';
 })
 export class Home {
   protected readonly auth = inject(AuthService);
+  protected readonly permissions = PERMISSIONS;
   private readonly router = inject(Router);
 
   protected logout(): void {

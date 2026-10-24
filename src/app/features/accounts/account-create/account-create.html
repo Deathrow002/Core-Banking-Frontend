@@ -1,0 +1,112 @@
+<main class="users-page">
+  <section class="users-page__card users-page__card--narrow" aria-labelledby="account-create-title">
+    <header class="users-page__header">
+      <div>
+        <h1 id="account-create-title">New account</h1>
+        <p>Find an existing customer, then open an account for them.</p>
+      </div>
+    </header>
+
+    @if (errorMessage(); as message) {
+      <div class="auth-alert" role="alert">{{ message }}</div>
+    }
+    @if (created(); as account) {
+      <p class="status" role="status">Account {{ account.accountId }} created.</p>
+    }
+
+    <div class="field">
+      @if (selected(); as customer) {
+        <span class="field__label">Customer</span>
+        <div class="account-create__selected">
+          <span>
+            <strong>{{ customer.firstName }} {{ customer.lastName }}</strong>
+            <small>{{ customer.email }}</small>
+          </span>
+          <button type="button" class="button button--secondary" (click)="clearSelection()">
+            Change
+          </button>
+        </div>
+      } @else {
+        <label for="customer-search">Customer</label>
+        <input
+          id="customer-search"
+          type="search"
+          [formControl]="search"
+          autocomplete="off"
+          placeholder="Name, email or national ID"
+          aria-describedby="customer-search-hint"
+        />
+        <small id="customer-search-hint" class="field__hint">
+          Type at least {{ minQueryLength }} characters to search.
+        </small>
+        @if (searching()) {
+          <p class="hint" aria-live="polite">Searching…</p>
+        }
+        @if (searchError(); as message) {
+          <small class="field__error">{{ message }}</small>
+        }
+        @if (results(); as customers) {
+          @if (customers.length) {
+            <ul class="account-create__results">
+              @for (customer of customers; track customer.customerId) {
+                <li>
+                  <button type="button" class="account-create__result" (click)="select(customer)">
+                    <strong>{{ customer.firstName }} {{ customer.lastName }}</strong>
+                    <small>{{ customer.email }}</small>
+                  </button>
+                </li>
+              }
+            </ul>
+          } @else {
+            <p class="hint">No customers match that search.</p>
+          }
+        }
+      }
+    </div>
+
+    <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
+      <div class="field">
+        <label for="accountType">Account type</label>
+        <select id="accountType" formControlName="accountType">
+          @for (type of accountTypes; track type) {
+            <option [value]="type">{{ type }}</option>
+          }
+        </select>
+      </div>
+
+      <div class="field">
+        <label for="currency">Currency</label>
+        <select id="currency" formControlName="currency">
+          @for (currency of currencyTypes; track currency) {
+            <option [value]="currency">{{ currency }}</option>
+          }
+        </select>
+      </div>
+
+      <div class="field">
+        <label for="balance">Opening balance</label>
+        <input
+          id="balance"
+          type="number"
+          min="0"
+          step="0.01"
+          formControlName="balance"
+          [attr.aria-invalid]="form.controls.balance.invalid && form.controls.balance.touched"
+          aria-describedby="balance-error"
+        />
+        @if (form.controls.balance.touched && form.controls.balance.invalid) {
+          <small id="balance-error" class="field__error"
+            >Enter an opening balance of 0 or more.</small
+          >
+        }
+      </div>
+
+      <div class="form-actions">
+        <a class="button button--secondary" routerLink="/">Cancel</a>
+        <button type="submit" class="auth-submit" [disabled]="submitting() || !selected()">
+          {{ submitting() ? 'Creating…' : 'Create account' }}
+        </button>
+      </div>
+    </form>
+  </section>
+</main>
