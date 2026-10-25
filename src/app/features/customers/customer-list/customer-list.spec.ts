@@ -62,11 +62,40 @@ describe('CustomerList', () => {
     return { fixture, el: fixture.nativeElement as HTMLElement };
   }
 
-  it('lists customers with Add and Edit actions', () => {
+  it('lists customers with an Add action and no row-level Edit', () => {
     const { el } = render();
     expect(el.textContent).toContain('Ada Lovelace');
     expect(el.querySelector('a[href="/customers/new"]')).not.toBeNull();
-    expect(el.querySelector('a[href="/customers/c1/edit"]')).not.toBeNull();
+    expect(el.querySelector('tbody a.link')).toBeNull();
+  });
+
+  it('edits a customer from the inquiry panel', () => {
+    const { fixture, el } = render();
+    buttonWithText(el, 'Ada Lovelace').click();
+    fixture.detectChanges();
+    http.expectOne((r) => r.method === 'GET' && r.url === '/customers').flush({
+      ...PAGE.content[0],
+      dateOfBirth: '1990-01-01',
+    });
+    fixture.detectChanges();
+
+    buttonWithText(el, 'Edit').click();
+    fixture.detectChanges();
+    const phone = el.querySelector<HTMLInputElement>('#edit-phone')!;
+    expect(phone.value).toBe('555');
+    phone.value = '999';
+    phone.dispatchEvent(new Event('input'));
+    el.querySelector('.inquiry form')!.dispatchEvent(new Event('submit'));
+
+    http.expectOne('/api/v1/auth/csrf').flush(null);
+    const put = http.expectOne((r) => r.method === 'PUT' && r.url === '/customers');
+    expect(put.request.params.get('customerId')).toBe('c1');
+    expect(put.request.body.phoneNumber).toBe('999');
+    put.flush({ ...PAGE.content[0], phoneNumber: '999' });
+    http.expectOne((r) => r.url === '/customers/search').flush(PAGE);
+    fixture.detectChanges();
+    expect(el.textContent).toContain('Customer updated.');
+    expect(el.querySelector('#edit-phone')).toBeNull();
   });
 
   it('searches with the entered query', () => {
@@ -110,6 +139,15 @@ describe('CustomerList', () => {
     const panel = el.querySelector('[aria-label="Customer inquiry"]');
     expect(panel?.textContent).toContain('1990-01-01');
     expect(panel?.textContent).toContain('Bangkok');
+  });
+
+  it('opens the inquiry when a row cell is clicked', () => {
+    const { fixture, el } = render();
+    el.querySelector<HTMLElement>('tbody td:nth-child(3)')!.click();
+    fixture.detectChanges();
+    http.expectOne((r) => r.url === '/customers').flush(PAGE.content[0]);
+    fixture.detectChanges();
+    expect(el.querySelector('[aria-label="Customer inquiry"]')).not.toBeNull();
   });
 
   it('hides actions without permissions', () => {

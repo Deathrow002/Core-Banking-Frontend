@@ -1,17 +1,27 @@
-import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, ElementRef, inject, signal } from '@angular/core';
+import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { finalize } from 'rxjs';
 import { PERMISSIONS } from '../../../core/auth/auth.models';
 import { AuthService } from '../../../core/auth/auth.service';
-import { CustomerPage, CustomerSummary } from '../../../core/customers/customer.models';
-import { CustomerService, toCustomerErrorMessage } from '../../../core/customers/customer.service';
+import {
+  CUSTOMER_STATUSES,
+  CustomerPage,
+  CustomerStatus,
+  CustomerSummary,
+} from '../../../core/customers/customer.models';
+import {
+  CustomerService,
+  toCustomerCreateErrorMessage,
+  toCustomerErrorMessage,
+} from '../../../core/customers/customer.service';
 import { Icon } from '../../../shared/icon/icon';
 
 const PAGE_SIZE = 10;
 
 @Component({
   selector: 'app-customer-list',
-  imports: [RouterLink, Icon],
+  imports: [ReactiveFormsModule, RouterLink, Icon],
   templateUrl: './customer-list.html',
   styleUrl: './customer-list.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -19,6 +29,7 @@ const PAGE_SIZE = 10;
 export class CustomerList {
   private readonly customers = inject(CustomerService);
   private readonly auth = inject(AuthService);
+  private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
 
   /** The backend enforces these permissions; hiding the actions only avoids offering calls that will fail. */
   protected readonly canAdd = this.auth.hasPermission(PERMISSIONS.add);
@@ -36,6 +47,19 @@ export class CustomerList {
   protected readonly inquiry = signal<CustomerSummary | null>(null);
   protected readonly inquiring = signal(false);
   protected readonly inquiryError = signal<string | null>(null);
+  protected readonly editing = signal(false);
+  protected readonly saving = signal(false);
+  protected readonly statuses = CUSTOMER_STATUSES;
+
+  protected readonly form = inject(NonNullableFormBuilder).group({
+    firstName: ['', Validators.required],
+    lastName: ['', Validators.required],
+    email: ['', [Validators.required, Validators.email]],
+    phoneNumber: ['', Validators.required],
+    nationalId: ['', Validators.required],
+    dateOfBirth: ['', Validators.required],
+    status: ['Active' as CustomerStatus, Validators.required],
+  });
 
   protected readonly rows = computed(() => this.data()?.content ?? []);
   protected readonly total = computed(() => this.data()?.totalElements ?? 0);
@@ -59,9 +83,18 @@ export class CustomerList {
     this.load();
   }
 
+  /** Row clicks open the inquiry; clicks on the row's own links and buttons keep their own behaviour. */
+  protected onRowClick(event: Event, customer: CustomerSummary): void {
+    if (!(event.target as HTMLElement).closest('a, button')) {
+      this.openInquiry(customer);
+    }
+  }
+
   /** Loads the customer's full record (including addresses) into the inquiry panel. */
   protected openInquiry(customer: CustomerSummary): void {
+    this.scrollToInquiry();
     this.inquiry.set(customer);
+    this.editing.set(false);
     this.inquiryError.set(null);
     this.inquiring.set(true);
     this.customers
@@ -79,6 +112,65 @@ export class CustomerList {
   protected closeInquiry(): void {
     this.inquiry.set(null);
     this.inquiryError.set(null);
+    this.editing.set(false);
+  }
+
+  /** Switches the inquiry panel into edit mode, prefilled from the inquiry record. */
+  protected startEdit(): void {
+    const customer = this.inquiry();
+    if (!customer) {
+      return;
+    }
+    this.form.reset({
+      firstName: customer.firstName,
+      lastName: customer.lastName,
+      email: customer.email,
+      phoneNumber: customer.phoneNumber ?? '',
+      nationalId: customer.nationalId ?? '',
+      dateOfBirth: (customer.dateOfBirth ?? '').slice(0, 10),
+      status: customer.status ?? 'Active',
+    });
+    this.inquiryError.set(null);
+    this.editing.set(true);
+  }
+
+  protected cancelEdit(): void {
+    this.editing.set(false);
+    this.inquiryError.set(null);
+  }
+
+  protected saveEdit(): void {
+    const customer = this.inquiry();
+    if (!customer || this.saving()) {
+      return;
+    }
+    if (this.form.invalid) {
+      this.form.markAllAsTouched();
+      return;
+    }
+    this.saving.set(true);
+    this.inquiryError.set(null);
+    this.customers
+      .update(customer.customerId, this.form.getRawValue())
+      .pipe(finalize(() => this.saving.set(false)))
+      .subscribe({
+        next: (updated) => {
+          this.inquiry.set({ ...customer, ...updated, addresses: customer.addresses });
+          this.editing.set(false);
+          this.successMessage.set('Customer updated.');
+          this.load();
+        },
+        error: (error: unknown) =>
+          this.inquiryError.set(
+            toCustomerCreateErrorMessage(error, 'Could not save the customer. Please try again.'),
+          ),
+      });
+  }
+
+  private scrollToInquiry(): void {
+    setTimeout(() =>
+      this.host.nativeElement.querySelector('.inquiry')?.scrollIntoView?.({ behavior: 'smooth', block: 'start' }),
+    );
   }
 
   protected requestDelete(customer: CustomerSummary): void {

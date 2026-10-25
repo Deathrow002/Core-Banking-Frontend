@@ -20,12 +20,58 @@
   @if (inquiry(); as details) {
     <section class="card card__body inquiry" aria-label="Account inquiry">
       <div class="inquiry__head">
-        <h2 class="section-title">Account inquiry</h2>
-        <button type="button" class="button button--secondary button--sm" (click)="closeInquiry()">Close</button>
+        <h2 class="section-title">Account Detail</h2>
+        <span>
+          @if (canEdit && !editing() && !inquiring()) {
+            <button type="button" class="button button--sm" (click)="startEdit()">Edit</button>
+          }
+          <button type="button" class="button button--secondary button--sm" (click)="closeInquiry()">Close</button>
+        </span>
       </div>
       @if (inquiryError(); as message) {
         <div class="alert" role="alert">{{ message }}</div>
       }
+      @if (editing()) {
+        <form [formGroup]="form" (ngSubmit)="saveEdit()" novalidate>
+          <dl class="detail-list">
+            <div><dt>Account ID</dt><dd class="mono">{{ details.accountId }}</dd></div>
+            <div>
+              <dt><label for="edit-accountType">Type</label></dt>
+              <dd>
+                <select id="edit-accountType" formControlName="accountType">
+                  @for (type of accountTypes(); track type) {
+                    <option [value]="type">{{ type }}</option>
+                  }
+                </select>
+              </dd>
+            </div>
+            <div>
+              <dt><label for="edit-currency">Currency</label></dt>
+              <dd>
+                <select id="edit-currency" formControlName="currency">
+                  @for (currency of currencyTypes(); track currency) {
+                    <option [value]="currency">{{ currency }}</option>
+                  }
+                </select>
+              </dd>
+            </div>
+            <div>
+              <dt><label for="edit-balance">Balance</label></dt>
+              <dd>
+                <input id="edit-balance" type="number" min="0" step="0.01" formControlName="balance" />
+                @if (form.controls.balance.touched && form.controls.balance.invalid) {
+                  <small class="field__error">Enter a balance of 0 or more.</small>
+                }
+              </dd>
+            </div>
+            <div><dt>Customer ID</dt><dd class="mono">{{ details.customerId }}</dd></div>
+          </dl>
+          <div class="form-actions">
+            <button type="button" class="button button--secondary" (click)="cancelEdit()">Cancel</button>
+            <button type="submit" class="button" [disabled]="saving()">{{ saving() ? 'Saving…' : 'Save changes' }}</button>
+          </div>
+        </form>
+      } @else {
       <dl class="detail-list">
         <div><dt>Account ID</dt><dd class="mono">{{ details.accountId }}</dd></div>
         <div><dt>Type</dt><dd>{{ details.accountType }}</dd></div>
@@ -41,6 +87,7 @@
           </div>
         }
       </dl>
+      }
       @if (inquiring()) {
         <p class="hint" aria-live="polite">Loading…</p>
       }
@@ -79,7 +126,7 @@
         </thead>
         <tbody>
           @for (account of rows(); track account.accountId) {
-            <tr>
+            <tr class="table__row--click" (click)="onRowClick($event, account)">
               <td>
                 <button type="button" class="link mono" (click)="openInquiry(account)">{{ account.accountId }}</button>
               </td>
@@ -98,9 +145,6 @@
                   </button>
                   <button type="button" class="button button--secondary button--sm" (click)="cancelDelete()">Cancel</button>
                 } @else {
-                  @if (canEdit) {
-                    <a class="link" [routerLink]="['/accounts', account.accountId, 'edit']">Edit</a>
-                  }
                   @if (canDelete) {
                     <button type="button" class="link-danger" (click)="requestDelete(account)">Delete</button>
                   }

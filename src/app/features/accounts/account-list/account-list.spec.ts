@@ -54,11 +54,36 @@ describe('AccountList', () => {
     return { fixture, el: fixture.nativeElement as HTMLElement };
   }
 
-  it('lists accounts with Add and Edit actions', () => {
+  it('lists accounts with an Add action and no row-level Edit', () => {
     const { el } = render();
     expect(el.textContent).toContain('1,500.50 USD');
     expect(el.querySelector('a[href="/accounts/new"]')).not.toBeNull();
-    expect(el.querySelector('a[href="/accounts/a1/edit"]')).not.toBeNull();
+    expect(el.querySelector('tbody a.link')).toBeNull();
+  });
+
+  it('edits an account from the inquiry panel', () => {
+    const { fixture, el } = render();
+    buttonWithText(el, 'a1').click();
+    fixture.detectChanges();
+    http.expectOne((r) => r.url === '/accounts/getAccount').flush(PAGE.content[0]);
+    http.expectOne((r) => r.url === '/customers').flush({ customerId: 'c1', firstName: 'Ada', lastName: 'L', email: 'a@b.c' });
+    fixture.detectChanges();
+
+    buttonWithText(el, 'Edit').click();
+    http.expectOne('/accounts/lookups').flush({ accountTypes: ['Savings', 'Current'], currencyTypes: ['USD'] });
+    fixture.detectChanges();
+    const balance = el.querySelector<HTMLInputElement>('#edit-balance')!;
+    balance.value = '2000';
+    balance.dispatchEvent(new Event('input'));
+    el.querySelector('.inquiry form')!.dispatchEvent(new Event('submit'));
+
+    http.expectOne('/api/v1/auth/csrf').flush(null);
+    const put = http.expectOne((r) => r.method === 'PUT' && r.url === '/accounts/updateAccount');
+    expect(put.request.body).toEqual({ accountId: 'a1', accountType: 'Savings', currency: 'USD', balance: 2000 });
+    put.flush({ ...PAGE.content[0], balance: 2000 });
+    http.expectOne((r) => r.url === '/accounts/search').flush(PAGE);
+    fixture.detectChanges();
+    expect(el.textContent).toContain('Account updated.');
   });
 
   it('deletes after confirmation', () => {
@@ -88,6 +113,16 @@ describe('AccountList', () => {
     const panel = el.querySelector('[aria-label="Account inquiry"]');
     expect(panel?.textContent).toContain('Savings');
     expect(panel?.textContent).toContain('Ada Lovelace');
+  });
+
+  it('opens the inquiry when a row cell is clicked', () => {
+    const { fixture, el } = render();
+    el.querySelector<HTMLElement>('tbody td:nth-child(3)')!.click();
+    fixture.detectChanges();
+    http.expectOne((r) => r.url === '/accounts/getAccount').flush(PAGE.content[0]);
+    http.expectOne((r) => r.url === '/customers').flush({ customerId: 'c1', firstName: 'Ada', lastName: 'Lovelace', email: 'a@b.c' });
+    fixture.detectChanges();
+    expect(el.querySelector('[aria-label="Account inquiry"]')).not.toBeNull();
   });
 
   it('hides actions without permissions', () => {

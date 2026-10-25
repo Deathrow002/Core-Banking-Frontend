@@ -69,14 +69,6 @@ export const routes: Routes = [
           ),
       },
       {
-        path: 'accounts/:id/edit',
-        title: 'Edit account | Core Banking',
-        canActivate: [staffGuard],
-        data: { permission: PERMISSIONS.edit },
-        loadComponent: () =>
-          import('./features/accounts/account-edit/account-edit').then((m) => m.AccountEdit),
-      },
-      {
         path: 'customers',
         title: 'Customers | Core Banking',
         canActivate: [staffGuard],
@@ -92,14 +84,6 @@ export const routes: Routes = [
           import('./features/customers/customer-create/customer-create').then(
             (m) => m.CustomerCreate,
           ),
-      },
-      {
-        path: 'customers/:id/edit',
-        title: 'Edit customer | Core Banking',
-        canActivate: [staffGuard],
-        data: { permission: PERMISSIONS.edit },
-        loadComponent: () =>
-          import('./features/customers/customer-edit/customer-edit').then((m) => m.CustomerEdit),
       },
     ],
   },

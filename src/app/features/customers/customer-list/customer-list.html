@@ -20,12 +20,67 @@
   @if (inquiry(); as details) {
     <section class="card card__body inquiry" aria-label="Customer inquiry">
       <div class="inquiry__head">
-        <h2 class="section-title">Customer inquiry</h2>
-        <button type="button" class="button button--secondary button--sm" (click)="closeInquiry()">Close</button>
+        <h2 class="section-title">Customer Detail</h2>
+        <span>
+          @if (canEdit && !editing() && !inquiring()) {
+            <button type="button" class="button button--sm" (click)="startEdit()">Edit</button>
+          }
+          <button type="button" class="button button--secondary button--sm" (click)="closeInquiry()">Close</button>
+        </span>
       </div>
       @if (inquiryError(); as message) {
         <div class="alert" role="alert">{{ message }}</div>
       }
+      @if (editing()) {
+        <form [formGroup]="form" (ngSubmit)="saveEdit()" novalidate>
+          <dl class="detail-list">
+            <div><dt>Customer ID</dt><dd class="mono">{{ details.customerId }}</dd></div>
+            <div>
+              <dt><label for="edit-firstName">First name</label></dt>
+              <dd><input id="edit-firstName" formControlName="firstName" autocomplete="off" /></dd>
+            </div>
+            <div>
+              <dt><label for="edit-lastName">Last name</label></dt>
+              <dd><input id="edit-lastName" formControlName="lastName" autocomplete="off" /></dd>
+            </div>
+            <div>
+              <dt><label for="edit-email">Email</label></dt>
+              <dd>
+                <input id="edit-email" type="email" formControlName="email" autocomplete="off" />
+                @if (form.controls.email.touched && form.controls.email.invalid) {
+                  <small class="field__error">Enter a valid email address.</small>
+                }
+              </dd>
+            </div>
+            <div>
+              <dt><label for="edit-phone">Phone</label></dt>
+              <dd><input id="edit-phone" type="tel" formControlName="phoneNumber" autocomplete="off" /></dd>
+            </div>
+            <div>
+              <dt><label for="edit-nationalId">National ID</label></dt>
+              <dd><input id="edit-nationalId" formControlName="nationalId" autocomplete="off" /></dd>
+            </div>
+            <div>
+              <dt><label for="edit-dob">Date of birth</label></dt>
+              <dd><input id="edit-dob" type="date" formControlName="dateOfBirth" /></dd>
+            </div>
+            <div>
+              <dt><label for="edit-status">Status</label></dt>
+              <dd>
+                <select id="edit-status" formControlName="status">
+                  @for (status of statuses; track status) {
+                    <option [value]="status">{{ status }}</option>
+                  }
+                </select>
+              </dd>
+            </div>
+          </dl>
+          <div class="form-actions">
+            <button type="button" class="button button--secondary" (click)="cancelEdit()">Cancel</button>
+            <button type="submit" class="button" [disabled]="saving()">{{ saving() ? 'Saving…' : 'Save changes' }}</button>
+          </div>
+        </form>
+      } @else {
       <dl class="detail-list">
         <div><dt>Customer ID</dt><dd class="mono">{{ details.customerId }}</dd></div>
         <div><dt>Name</dt><dd>{{ details.firstName }} {{ details.lastName }}</dd></div>
@@ -44,6 +99,7 @@
           </div>
         }
       </dl>
+      }
       @if (inquiring()) {
         <p class="hint" aria-live="polite">Loading…</p>
       }
@@ -82,7 +138,7 @@
         </thead>
         <tbody>
           @for (customer of rows(); track customer.customerId) {
-            <tr>
+            <tr class="table__row--click" (click)="onRowClick($event, customer)">
               <td>
                 <span class="user-cell">
                   <span class="avatar" aria-hidden="true">{{ customer.firstName.charAt(0) }}{{ customer.lastName.charAt(0) }}</span>
@@ -113,9 +169,6 @@
                   </button>
                   <button type="button" class="button button--secondary button--sm" (click)="cancelDelete()">Cancel</button>
                 } @else {
-                  @if (canEdit) {
-                    <a class="link" [routerLink]="['/customers', customer.customerId, 'edit']">Edit</a>
-                  }
                   @if (canDelete) {
                     <button type="button" class="link-danger" (click)="requestDelete(customer)">Delete</button>
                   }

@@ -459,6 +459,10 @@
     background: var(--navy-50);
   }
 
+  &__row--click {
+    cursor: pointer;
+  }
+
   &__actions {
     text-align: right !important;
     white-space: nowrap;

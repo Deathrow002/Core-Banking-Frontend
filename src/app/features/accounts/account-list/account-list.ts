@@ -1,5 +1,6 @@
 import { DecimalPipe } from '@angular/common';
-import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, ElementRef, inject, signal } from '@angular/core';
+import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { catchError, finalize, forkJoin, of } from 'rxjs';
 import { Account, AccountPage } from '../../../core/accounts/account.models';
@@ -14,7 +15,7 @@ const PAGE_SIZE = 10;
 
 @Component({
   selector: 'app-account-list',
-  imports: [DecimalPipe, RouterLink, Icon],
+  imports: [DecimalPipe, ReactiveFormsModule, RouterLink, Icon],
   templateUrl: './account-list.html',
   styleUrl: './account-list.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -22,6 +23,7 @@ const PAGE_SIZE = 10;
 export class AccountList {
   private readonly accounts = inject(AccountService);
   private readonly customers = inject(CustomerService);
+  private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
   private readonly auth = inject(AuthService);
 
   /** The backend enforces these permissions; hiding the actions only avoids offering calls that will fail. */
@@ -41,6 +43,16 @@ export class AccountList {
   protected readonly inquiryCustomer = signal<CustomerSummary | null>(null);
   protected readonly inquiring = signal(false);
   protected readonly inquiryError = signal<string | null>(null);
+  protected readonly editing = signal(false);
+  protected readonly saving = signal(false);
+  protected readonly accountTypes = signal<string[]>([]);
+  protected readonly currencyTypes = signal<string[]>([]);
+
+  protected readonly form = inject(NonNullableFormBuilder).group({
+    accountType: ['', Validators.required],
+    currency: ['', Validators.required],
+    balance: [0, [Validators.required, Validators.min(0)]],
+  });
 
   protected readonly rows = computed(() => this.data()?.content ?? []);
   protected readonly total = computed(() => this.data()?.totalElements ?? 0);
@@ -64,9 +76,18 @@ export class AccountList {
     this.load();
   }
 
+  /** Row clicks open the inquiry; clicks on the row's own links and buttons keep their own behaviour. */
+  protected onRowClick(event: Event, account: Account): void {
+    if (!(event.target as HTMLElement).closest('a, button')) {
+      this.openInquiry(account);
+    }
+  }
+
   /** Loads the account's current record together with its owning customer. */
   protected openInquiry(account: Account): void {
+    this.scrollToInquiry();
     this.inquiry.set(account);
+    this.editing.set(false);
     this.inquiryCustomer.set(null);
     this.inquiryError.set(null);
     this.inquiring.set(true);
@@ -91,6 +112,70 @@ export class AccountList {
     this.inquiry.set(null);
     this.inquiryCustomer.set(null);
     this.inquiryError.set(null);
+    this.editing.set(false);
+  }
+
+  /** Switches the inquiry panel into edit mode, loading the type and currency options on first use. */
+  protected startEdit(): void {
+    const account = this.inquiry();
+    if (!account) {
+      return;
+    }
+    this.form.reset({
+      accountType: account.accountType,
+      currency: account.currency,
+      balance: account.balance,
+    });
+    this.inquiryError.set(null);
+    this.editing.set(true);
+    if (!this.accountTypes().length) {
+      this.accounts.lookups().subscribe({
+        next: (lookups) => {
+          this.accountTypes.set(lookups.accountTypes);
+          this.currencyTypes.set(lookups.currencyTypes);
+        },
+        error: () => this.inquiryError.set('Could not load account options. Please try again.'),
+      });
+    }
+  }
+
+  protected cancelEdit(): void {
+    this.editing.set(false);
+    this.inquiryError.set(null);
+  }
+
+  protected saveEdit(): void {
+    const account = this.inquiry();
+    if (!account || this.saving()) {
+      return;
+    }
+    if (this.form.invalid) {
+      this.form.markAllAsTouched();
+      return;
+    }
+    this.saving.set(true);
+    this.inquiryError.set(null);
+    this.accounts
+      .update({ accountId: account.accountId, ...this.form.getRawValue() })
+      .pipe(finalize(() => this.saving.set(false)))
+      .subscribe({
+        next: (updated) => {
+          this.inquiry.set(updated);
+          this.editing.set(false);
+          this.successMessage.set('Account updated.');
+          this.load();
+        },
+        error: (error: unknown) =>
+          this.inquiryError.set(
+            toAccountErrorMessage(error, 'Could not save the account. Please try again.'),
+          ),
+      });
+  }
+
+  private scrollToInquiry(): void {
+    setTimeout(() =>
+      this.host.nativeElement.querySelector('.inquiry')?.scrollIntoView?.({ behavior: 'smooth', block: 'start' }),
+    );
   }
 
   protected requestDelete(account: Account): void {

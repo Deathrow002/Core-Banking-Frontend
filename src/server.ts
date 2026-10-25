@@ -10,7 +10,9 @@ import { join } from 'node:path';
 const browserDistFolder = join(import.meta.dirname, '../browser');
 
 const app = express();
-const angularApp = new AngularNodeAppEngine();
+// The gateway adds X-Forwarded-For; allow only that header so Angular stops warning about it
+// without trusting host/proto/prefix overrides.
+const angularApp = new AngularNodeAppEngine({ trustProxyHeaders: ['x-forwarded-for'] });
 
 /**
  * Example Express Rest API endpoints can be defined here.
