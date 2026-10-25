@@ -4,6 +4,22 @@ export interface CustomerSummary {
   firstName: string;
   lastName: string;
   email: string;
+  phoneNumber?: string;
+  nationalId?: string;
+  dateOfBirth?: string;
+  status?: CustomerStatus;
+  addresses?: AddressPayload[];
+}
+
+/** Fields PUT /customers updates (addresses are not changed by an update). */
+export interface CustomerUpdatePayload {
+  firstName: string;
+  lastName: string;
+  email: string;
+  phoneNumber: string;
+  nationalId: string;
+  dateOfBirth: string;
+  status: CustomerStatus;
 }
 
 /** Mirrors com.customer.model.DTO.CustomerPage. */

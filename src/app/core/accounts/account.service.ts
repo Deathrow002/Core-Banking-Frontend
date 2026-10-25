@@ -1,12 +1,22 @@
-import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse, HttpParams } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { Observable, switchMap } from 'rxjs';
 import { AUTH_API } from '../auth/auth.service';
-import { Account, AccountCreatePayload, AccountLookups } from './account.models';
+import {
+  Account,
+  AccountCreatePayload,
+  AccountLookups,
+  AccountPage,
+  AccountUpdatePayload,
+} from './account.models';
 
 export const ACCOUNT_API = {
   create: '/accounts/createAccount',
   lookups: '/accounts/lookups',
+  search: '/accounts/search',
+  get: '/accounts/getAccount',
+  update: '/accounts/updateAccount',
+  delete: '/accounts/deleteAccount',
 };
 
 /** Talks to the Account service through the gateway. Mutations prime CSRF first, like UserManagementService does. */
@@ -16,6 +26,33 @@ export class AccountService {
 
   lookups(): Observable<AccountLookups> {
     return this.http.get<AccountLookups>(ACCOUNT_API.lookups);
+  }
+
+  search(query: string, page = 0, size = 10): Observable<AccountPage> {
+    const params = new HttpParams().set('query', query).set('page', page).set('size', size);
+    return this.http.get<AccountPage>(ACCOUNT_API.search, { params });
+  }
+
+  get(accountId: string): Observable<Account> {
+    const params = new HttpParams().set('accNo', accountId);
+    return this.http.get<Account>(ACCOUNT_API.get, { params });
+  }
+
+  update(payload: AccountUpdatePayload): Observable<Account> {
+    return this.http
+      .get<void>(AUTH_API.csrf)
+      .pipe(switchMap(() => this.http.put<Account>(ACCOUNT_API.update, payload)));
+  }
+
+  delete(accountId: string): Observable<string> {
+    const params = new HttpParams().set('accNo', accountId);
+    return this.http
+      .get<void>(AUTH_API.csrf)
+      .pipe(
+        switchMap(() =>
+          this.http.delete(ACCOUNT_API.delete, { params, responseType: 'text' }),
+        ),
+      );
   }
 
   create(payload: AccountCreatePayload): Observable<Account> {
@@ -38,7 +75,7 @@ export function toAccountErrorMessage(error: unknown, fallback: string): string 
       return 'Your session has expired. Please sign in again.';
     }
     if (error.status === 403) {
-      return 'You do not have permission to create accounts.';
+      return 'You do not have permission for this account action.';
     }
     if (error.status === 409 || error.status === 400) {
       const message = (error.error as { message?: unknown } | null)?.message;

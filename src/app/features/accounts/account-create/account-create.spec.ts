@@ -158,4 +158,31 @@ describe('AccountCreate', () => {
     expect(el.querySelector('.alert')?.textContent).toContain('Customer ID does not exist');
     expect(el.querySelector('.account-create__selected')).not.toBeNull();
   });
+
+  function verify(status: string): void {
+    findAndSelectAda();
+    const button = Array.from(el.querySelectorAll<HTMLButtonElement>('.account-create__selected button')).find(
+      (b) => b.textContent?.includes('Verify customer'),
+    );
+    button?.click();
+    fixture.detectChanges();
+    const req = http.expectOne((r) => r.method === 'GET' && r.url === '/customers' && r.params.get('customerId') === CUSTOMER.customerId);
+    req.flush({ ...CUSTOMER, phoneNumber: '555', nationalId: '123', dateOfBirth: '1990-01-01', status });
+    fixture.detectChanges();
+  }
+
+  it('shows the customer inquiry details when verified', () => {
+    verify('Active');
+
+    expect(el.querySelector('.account-create__inquiry')?.textContent).toContain('123');
+    expect(el.querySelector('[role=status]')?.textContent).toContain('Customer verified');
+    expect(el.querySelector<HTMLButtonElement>('button[type="submit"]')?.disabled).toBe(false);
+  });
+
+  it('blocks account creation for a customer that is not Active', () => {
+    verify('Suspended');
+
+    expect(el.querySelector('.alert')?.textContent).toContain('not Active');
+    expect(el.querySelector<HTMLButtonElement>('button[type="submit"]')?.disabled).toBe(true);
+  });
 });

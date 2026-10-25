@@ -11,6 +11,12 @@
     "changeOrigin": true,
     "logLevel": "info"
   },
+  "^/accounts/(search|getAccount|updateAccount|deleteAccount)": {
+    "target": "http://localhost:8081",
+    "secure": false,
+    "changeOrigin": true,
+    "logLevel": "info"
+  },
   "/accounts/lookups": {
     "target": "http://localhost:8081",
     "secure": false,

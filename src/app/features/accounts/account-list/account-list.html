@@ -1,0 +1,143 @@
+<div class="page">
+  <header class="page-header">
+    <div>
+      <span class="page-header__eyebrow">Operations</span>
+      <h1>Accounts</h1>
+      <p>Enquire, add, edit and delete bank accounts.</p>
+    </div>
+    @if (canAdd) {
+      <a class="button" routerLink="/accounts/new"><app-icon name="plus" [size]="16" />New account</a>
+    }
+  </header>
+
+  @if (errorMessage(); as message) {
+    <div class="alert" role="alert">{{ message }}</div>
+  }
+  @if (successMessage(); as message) {
+    <div class="alert alert--success" role="status">{{ message }}</div>
+  }
+
+  @if (inquiry(); as details) {
+    <section class="card card__body inquiry" aria-label="Account inquiry">
+      <div class="inquiry__head">
+        <h2 class="section-title">Account inquiry</h2>
+        <button type="button" class="button button--secondary button--sm" (click)="closeInquiry()">Close</button>
+      </div>
+      @if (inquiryError(); as message) {
+        <div class="alert" role="alert">{{ message }}</div>
+      }
+      <dl class="detail-list">
+        <div><dt>Account ID</dt><dd class="mono">{{ details.accountId }}</dd></div>
+        <div><dt>Type</dt><dd>{{ details.accountType }}</dd></div>
+        <div><dt>Balance</dt><dd>{{ details.balance | number: '1.2-2' }} {{ details.currency }}</dd></div>
+        <div><dt>Customer ID</dt><dd class="mono">{{ details.customerId }}</dd></div>
+        @if (inquiryCustomer(); as customer) {
+          <div><dt>Customer</dt><dd>{{ customer.firstName }} {{ customer.lastName }}</dd></div>
+          <div><dt>Email</dt><dd>{{ customer.email }}</dd></div>
+          <div><dt>Phone</dt><dd>{{ customer.phoneNumber || '—' }}</dd></div>
+          <div>
+            <dt>Customer status</dt>
+            <dd><span class="status" [class.status--off]="customer.status !== 'Active'">{{ customer.status }}</span></dd>
+          </div>
+        }
+      </dl>
+      @if (inquiring()) {
+        <p class="hint" aria-live="polite">Loading…</p>
+      }
+    </section>
+  }
+
+  <section class="card">
+    <div class="toolbar">
+      <form class="search" role="search" (submit)="onSearch($event, searchInput.value)">
+        <label class="visually-hidden" for="account-query">Search accounts</label>
+        <input
+          #searchInput
+          id="account-query"
+          type="search"
+          placeholder="Account ID, customer ID, type or currency"
+          [value]="query()"
+          autocomplete="off"
+        />
+        <button type="submit" class="button button--secondary">Search</button>
+      </form>
+      <span class="toolbar__count" aria-live="polite">
+        {{ loading() ? 'Loading…' : total() + ' account(s)' }}
+      </span>
+    </div>
+
+    <div class="table-wrap">
+      <table class="table">
+        <thead>
+          <tr>
+            <th scope="col">Account</th>
+            <th scope="col">Customer</th>
+            <th scope="col">Type</th>
+            <th scope="col">Balance</th>
+            <th scope="col"><span class="visually-hidden">Actions</span></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (account of rows(); track account.accountId) {
+            <tr>
+              <td>
+                <button type="button" class="link mono" (click)="openInquiry(account)">{{ account.accountId }}</button>
+              </td>
+              <td class="mono">{{ account.customerId }}</td>
+              <td><span class="badge">{{ account.accountType }}</span></td>
+              <td class="nowrap">{{ account.balance | number: '1.2-2' }} {{ account.currency }}</td>
+              <td class="table__actions">
+                @if (pendingDeleteId() === account.accountId) {
+                  <button
+                    type="button"
+                    class="button button--danger button--sm"
+                    [disabled]="deletingId() === account.accountId"
+                    (click)="confirmDelete(account)"
+                  >
+                    Confirm delete
+                  </button>
+                  <button type="button" class="button button--secondary button--sm" (click)="cancelDelete()">Cancel</button>
+                } @else {
+                  @if (canEdit) {
+                    <a class="link" [routerLink]="['/accounts', account.accountId, 'edit']">Edit</a>
+                  }
+                  @if (canDelete) {
+                    <button type="button" class="link-danger" (click)="requestDelete(account)">Delete</button>
+                  }
+                }
+              </td>
+            </tr>
+          } @empty {
+            <tr>
+              <td class="table__empty" colspan="5">
+                {{ loading() ? 'Loading accounts…' : 'No accounts found.' }}
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <nav class="pager" aria-label="Pagination">
+      <span>Page {{ pageIndex() + 1 }} of {{ totalPages() }}</span>
+      <span>
+        <button
+          type="button"
+          class="button button--secondary button--sm"
+          [disabled]="!canPrevious() || loading()"
+          (click)="goTo(pageIndex() - 1)"
+        >
+          Previous
+        </button>
+        <button
+          type="button"
+          class="button button--secondary button--sm"
+          [disabled]="!canNext() || loading()"
+          (click)="goTo(pageIndex() + 1)"
+        >
+          Next
+        </button>
+      </span>
+    </nav>
+  </section>
+</div>

@@ -57,6 +57,10 @@ form {
     }
   }
 
+  &__inquiry {
+    margin: 0.75rem 0;
+  }
+
   &__results {
     max-height: 16rem;
     overflow-y: auto;

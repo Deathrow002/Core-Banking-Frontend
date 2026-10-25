@@ -1,0 +1,158 @@
+<div class="page">
+  <header class="page-header">
+    <div>
+      <span class="page-header__eyebrow">Operations</span>
+      <h1>Customers</h1>
+      <p>Enquire, add, edit and delete customer records.</p>
+    </div>
+    @if (canAdd) {
+      <a class="button" routerLink="/customers/new"><app-icon name="plus" [size]="16" />New customer</a>
+    }
+  </header>
+
+  @if (errorMessage(); as message) {
+    <div class="alert" role="alert">{{ message }}</div>
+  }
+  @if (successMessage(); as message) {
+    <div class="alert alert--success" role="status">{{ message }}</div>
+  }
+
+  @if (inquiry(); as details) {
+    <section class="card card__body inquiry" aria-label="Customer inquiry">
+      <div class="inquiry__head">
+        <h2 class="section-title">Customer inquiry</h2>
+        <button type="button" class="button button--secondary button--sm" (click)="closeInquiry()">Close</button>
+      </div>
+      @if (inquiryError(); as message) {
+        <div class="alert" role="alert">{{ message }}</div>
+      }
+      <dl class="detail-list">
+        <div><dt>Customer ID</dt><dd class="mono">{{ details.customerId }}</dd></div>
+        <div><dt>Name</dt><dd>{{ details.firstName }} {{ details.lastName }}</dd></div>
+        <div><dt>Email</dt><dd>{{ details.email }}</dd></div>
+        <div><dt>Phone</dt><dd>{{ details.phoneNumber || '—' }}</dd></div>
+        <div><dt>National ID</dt><dd class="mono">{{ details.nationalId || '—' }}</dd></div>
+        <div><dt>Date of birth</dt><dd>{{ details.dateOfBirth || '—' }}</dd></div>
+        <div>
+          <dt>Status</dt>
+          <dd><span class="status" [class.status--off]="details.status !== 'Active'">{{ details.status }}</span></dd>
+        </div>
+        @for (address of details.addresses ?? []; track $index) {
+          <div>
+            <dt>{{ address.addressType }} address</dt>
+            <dd>{{ address.address }}, {{ address.subDistrict }}, {{ address.district }}, {{ address.city }}, {{ address.country }} {{ address.zipCode }}</dd>
+          </div>
+        }
+      </dl>
+      @if (inquiring()) {
+        <p class="hint" aria-live="polite">Loading…</p>
+      }
+    </section>
+  }
+
+  <section class="card">
+    <div class="toolbar">
+      <form class="search" role="search" (submit)="onSearch($event, searchInput.value)">
+        <label class="visually-hidden" for="customer-query">Search customers</label>
+        <input
+          #searchInput
+          id="customer-query"
+          type="search"
+          placeholder="Name, email or national ID"
+          [value]="query()"
+          autocomplete="off"
+        />
+        <button type="submit" class="button button--secondary">Search</button>
+      </form>
+      <span class="toolbar__count" aria-live="polite">
+        {{ loading() ? 'Loading…' : total() + ' customer(s)' }}
+      </span>
+    </div>
+
+    <div class="table-wrap">
+      <table class="table">
+        <thead>
+          <tr>
+            <th scope="col">Customer</th>
+            <th scope="col">National ID</th>
+            <th scope="col">Phone</th>
+            <th scope="col">Status</th>
+            <th scope="col"><span class="visually-hidden">Actions</span></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (customer of rows(); track customer.customerId) {
+            <tr>
+              <td>
+                <span class="user-cell">
+                  <span class="avatar" aria-hidden="true">{{ customer.firstName.charAt(0) }}{{ customer.lastName.charAt(0) }}</span>
+                  <span>
+                    <button type="button" class="link" (click)="openInquiry(customer)">
+                      {{ customer.firstName }} {{ customer.lastName }}
+                    </button>
+                    <small class="hint">{{ customer.email }}</small>
+                  </span>
+                </span>
+              </td>
+              <td class="mono">{{ customer.nationalId }}</td>
+              <td class="nowrap">{{ customer.phoneNumber }}</td>
+              <td>
+                <span class="status" [class.status--off]="customer.status !== 'Active'">
+                  {{ customer.status }}
+                </span>
+              </td>
+              <td class="table__actions">
+                @if (pendingDeleteId() === customer.customerId) {
+                  <button
+                    type="button"
+                    class="button button--danger button--sm"
+                    [disabled]="deletingId() === customer.customerId"
+                    (click)="confirmDelete(customer)"
+                  >
+                    Confirm delete
+                  </button>
+                  <button type="button" class="button button--secondary button--sm" (click)="cancelDelete()">Cancel</button>
+                } @else {
+                  @if (canEdit) {
+                    <a class="link" [routerLink]="['/customers', customer.customerId, 'edit']">Edit</a>
+                  }
+                  @if (canDelete) {
+                    <button type="button" class="link-danger" (click)="requestDelete(customer)">Delete</button>
+                  }
+                }
+              </td>
+            </tr>
+          } @empty {
+            <tr>
+              <td class="table__empty" colspan="5">
+                {{ loading() ? 'Loading customers…' : 'No customers found.' }}
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <nav class="pager" aria-label="Pagination">
+      <span>Page {{ pageIndex() + 1 }} of {{ totalPages() }}</span>
+      <span>
+        <button
+          type="button"
+          class="button button--secondary button--sm"
+          [disabled]="!canPrevious() || loading()"
+          (click)="goTo(pageIndex() - 1)"
+        >
+          Previous
+        </button>
+        <button
+          type="button"
+          class="button button--secondary button--sm"
+          [disabled]="!canNext() || loading()"
+          (click)="goTo(pageIndex() + 1)"
+        >
+          Next
+        </button>
+      </span>
+    </nav>
+  </section>
+</div>

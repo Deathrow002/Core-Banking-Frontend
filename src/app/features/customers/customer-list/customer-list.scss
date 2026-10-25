@@ -1,0 +1,24 @@
+:host {
+  display: block;
+}
+
+.inquiry {
+  margin-bottom: 1rem;
+
+  &__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+}
+
+.search {
+  display: flex;
+  gap: 0.5rem;
+  flex: 1;
+  max-width: 28rem;
+
+  input {
+    flex: 1;
+  }
+}

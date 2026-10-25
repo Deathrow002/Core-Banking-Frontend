@@ -2,7 +2,13 @@ import { HttpClient, HttpErrorResponse, HttpParams } from '@angular/common/http'
 import { inject, Injectable } from '@angular/core';
 import { Observable, switchMap } from 'rxjs';
 import { AUTH_API } from '../auth/auth.service';
-import { CreatedCustomer, CustomerCreatePayload, CustomerPage } from './customer.models';
+import {
+  CreatedCustomer,
+  CustomerCreatePayload,
+  CustomerPage,
+  CustomerSummary,
+  CustomerUpdatePayload,
+} from './customer.models';
 
 export const CUSTOMER_API = {
   search: '/customers/search',
@@ -17,6 +23,27 @@ export class CustomerService {
   search(query: string, page = 0, size = 10): Observable<CustomerPage> {
     const params = new HttpParams().set('query', query).set('page', page).set('size', size);
     return this.http.get<CustomerPage>(CUSTOMER_API.search, { params });
+  }
+
+  get(customerId: string): Observable<CustomerSummary> {
+    const params = new HttpParams().set('customerId', customerId);
+    return this.http.get<CustomerSummary>(CUSTOMER_API.create, { params });
+  }
+
+  update(customerId: string, payload: CustomerUpdatePayload): Observable<CustomerSummary> {
+    const params = new HttpParams().set('customerId', customerId);
+    return this.http
+      .get<void>(AUTH_API.csrf)
+      .pipe(
+        switchMap(() => this.http.put<CustomerSummary>(CUSTOMER_API.create, payload, { params })),
+      );
+  }
+
+  delete(customerId: string): Observable<void> {
+    const params = new HttpParams().set('customerId', customerId);
+    return this.http
+      .get<void>(AUTH_API.csrf)
+      .pipe(switchMap(() => this.http.delete<void>(CUSTOMER_API.create, { params })));
   }
 
   create(payload: CustomerCreatePayload): Observable<CreatedCustomer> {
@@ -54,7 +81,7 @@ export function toCustomerErrorMessage(error: unknown, fallback: string): string
       return 'Your session has expired. Please sign in again.';
     }
     if (error.status === 403) {
-      return 'You do not have permission to search customers.';
+      return 'You do not have permission for this customer action.';
     }
   }
   return fallback;

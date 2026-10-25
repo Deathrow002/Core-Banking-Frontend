@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import {
   FormControl,
@@ -51,6 +51,14 @@ export class AccountCreate {
   /** null means no search has run yet or the query is too short; an empty array means no matches. */
   protected readonly results = signal<CustomerSummary[] | null>(null);
   protected readonly selected = signal<CustomerSummary | null>(null);
+  protected readonly inquiry = signal<CustomerSummary | null>(null);
+  protected readonly inquiring = signal(false);
+  protected readonly inquiryError = signal<string | null>(null);
+  /** A customer whose inquiry shows a non-Active status cannot receive a new account. */
+  protected readonly inquiryBlocked = computed(() => {
+    const status = this.inquiry()?.status;
+    return !!status && status !== 'Active';
+  });
 
   protected readonly form = inject(NonNullableFormBuilder).group({
     accountType: [DEFAULT_ACCOUNT_TYPE, [Validators.required]],
@@ -95,11 +103,35 @@ export class AccountCreate {
 
   protected select(customer: CustomerSummary): void {
     this.selected.set(customer);
+    this.inquiry.set(null);
+    this.inquiryError.set(null);
     this.errorMessage.set(null);
   }
 
   protected clearSelection(): void {
     this.selected.set(null);
+    this.inquiry.set(null);
+    this.inquiryError.set(null);
+  }
+
+  /** Fetches the customer's current record so staff can validate it before opening an account. */
+  protected inquire(): void {
+    const customer = this.selected();
+    if (!customer || this.inquiring()) {
+      return;
+    }
+    this.inquiring.set(true);
+    this.inquiryError.set(null);
+    this.customers
+      .get(customer.customerId)
+      .pipe(finalize(() => this.inquiring.set(false)))
+      .subscribe({
+        next: (details) => this.inquiry.set(details),
+        error: (error: unknown) =>
+          this.inquiryError.set(
+            toCustomerErrorMessage(error, 'Could not retrieve the customer. Please try again.'),
+          ),
+      });
   }
 
   protected submit(): void {
@@ -109,6 +141,10 @@ export class AccountCreate {
     const customer = this.selected();
     if (!customer) {
       this.errorMessage.set('Select a customer before creating an account.');
+      return;
+    }
+    if (this.inquiryBlocked()) {
+      this.errorMessage.set('This customer is not Active, so an account cannot be opened.');
       return;
     }
     if (this.form.invalid) {
@@ -164,7 +200,8 @@ export class AccountCreate {
   private resetForm(): void {
     this.form.reset(this.defaultValues());
     this.selected.set(null);
-    this.results.set(null);
+    this.inquiry.set(null);
+    this.inquiryError.set(null);
     this.searchError.set(null);
     this.search.setValue('');
   }

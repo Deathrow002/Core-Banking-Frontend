@@ -23,3 +23,20 @@ export interface Account {
   currency: CurrencyType;
   accountType: AccountType;
 }
+
+/** Mirrors com.account.model.DTO.AccountPage. */
+export interface AccountPage {
+  content: Account[];
+  totalElements: number;
+  totalPages: number;
+  number: number;
+  size: number;
+}
+
+/** Body of PUT /accounts/updateAccount. */
+export interface AccountUpdatePayload {
+  accountId: string;
+  balance: number;
+  currency: CurrencyType;
+  accountType: AccountType;
+}

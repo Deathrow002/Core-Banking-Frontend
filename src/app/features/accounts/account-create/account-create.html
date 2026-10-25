@@ -31,10 +31,35 @@
             <strong>{{ customer.firstName }} {{ customer.lastName }}</strong>
             <small>{{ customer.email }}</small>
           </span>
+          <button type="button" class="button button--secondary button--sm" (click)="inquire()" [disabled]="inquiring()">
+            <app-icon name="search" [size]="14" />{{ inquiring() ? 'Checking…' : 'Verify customer' }}
+          </button>
           <button type="button" class="button button--secondary button--sm" (click)="clearSelection()">
             Change
           </button>
         </div>
+        @if (inquiryError(); as message) {
+          <div class="alert" role="alert">{{ message }}</div>
+        }
+        @if (inquiry(); as details) {
+          <dl class="detail-list account-create__inquiry" aria-label="Customer inquiry">
+            <div><dt>Customer ID</dt><dd class="mono">{{ details.customerId }}</dd></div>
+            <div><dt>Name</dt><dd>{{ details.firstName }} {{ details.lastName }}</dd></div>
+            <div><dt>Email</dt><dd>{{ details.email }}</dd></div>
+            <div><dt>Phone</dt><dd>{{ details.phoneNumber || '—' }}</dd></div>
+            <div><dt>National ID</dt><dd class="mono">{{ details.nationalId || '—' }}</dd></div>
+            <div><dt>Date of birth</dt><dd>{{ details.dateOfBirth || '—' }}</dd></div>
+            <div>
+              <dt>Status</dt>
+              <dd><span class="status" [class.status--off]="details.status !== 'Active'">{{ details.status }}</span></dd>
+            </div>
+          </dl>
+          @if (inquiryBlocked()) {
+            <div class="alert" role="alert">This customer is not Active, so an account cannot be opened.</div>
+          } @else {
+            <div class="alert alert--success" role="status">Customer verified.</div>
+          }
+        }
       } @else {
         <label for="customer-search">Search customers</label>
         <div class="account-create__search">
@@ -115,8 +140,8 @@
       </div>
 
       <div class="form-actions">
-        <a class="button button--secondary" routerLink="/home">Cancel</a>
-        <button type="submit" class="button" [disabled]="submitting() || !selected() || !lookupsLoaded()">
+        <a class="button button--secondary" routerLink="/accounts">Cancel</a>
+        <button type="submit" class="button" [disabled]="submitting() || !selected() || !lookupsLoaded() || inquiryBlocked()">
           {{ submitting() ? 'Creating…' : 'Create account' }}
         </button>
       </div>

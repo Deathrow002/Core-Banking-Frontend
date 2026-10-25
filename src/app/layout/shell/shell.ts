@@ -2,7 +2,6 @@ import { ChangeDetectionStrategy, Component, computed, DestroyRef, inject, signa
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { NavigationEnd, Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { filter } from 'rxjs';
-import { PERMISSIONS } from '../../core/auth/auth.models';
 import { AuthService } from '../../core/auth/auth.service';
 import { BrandLogo } from '../../shared/brand-logo/brand-logo';
 import { Icon, IconName } from '../../shared/icon/icon';
@@ -45,15 +44,13 @@ export class Shell {
       title: 'Administration',
       items: [{ label: 'User management', link: '/users', icon: 'users' }],
     });
-    if (this.auth.hasPermission(PERMISSIONS.add)) {
-      sections.push({
-        title: 'Operations',
-        items: [
-          { label: 'New customer', link: '/customers/new', icon: 'user-plus', exact: true },
-          { label: 'New account', link: '/accounts/new', icon: 'card', exact: true },
-        ],
-      });
-    }
+    sections.push({
+      title: 'Operations',
+      items: [
+        { label: 'Customers', link: '/customers', icon: 'users' },
+        { label: 'Accounts', link: '/accounts', icon: 'card' },
+      ],
+    });
     return sections;
   });
 
