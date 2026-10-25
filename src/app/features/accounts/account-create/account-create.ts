@@ -21,6 +21,7 @@ import { Account } from '../../../core/accounts/account.models';
 import { AccountService, toAccountErrorMessage } from '../../../core/accounts/account.service';
 import { CustomerSummary } from '../../../core/customers/customer.models';
 import { CustomerService, toCustomerErrorMessage } from '../../../core/customers/customer.service';
+import { Icon } from '../../../shared/icon/icon';
 
 const MIN_QUERY_LENGTH = 2;
 const SEARCH_DEBOUNCE_MS = 300;
@@ -29,7 +30,7 @@ const DEFAULT_CURRENCY = 'THB';
 
 @Component({
   selector: 'app-account-create',
-  imports: [ReactiveFormsModule, RouterLink],
+  imports: [ReactiveFormsModule, RouterLink, Icon],
   templateUrl: './account-create.html',
   styleUrl: './account-create.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

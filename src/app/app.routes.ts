@@ -11,53 +11,67 @@ export const routes: Routes = [
     loadComponent: () => import('./features/auth/login/login').then((m) => m.Login),
   },
   {
-    path: 'users',
-    title: 'Users | Core Banking',
-    canActivate: [staffGuard],
-    loadComponent: () => import('./features/users/user-list/user-list').then((m) => m.UserList),
-  },
-  {
-    path: 'users/new',
-    title: 'New user | Core Banking',
-    canActivate: [staffGuard],
-    data: { permission: PERMISSIONS.add },
-    loadComponent: () => import('./features/users/user-form/user-form').then((m) => m.UserForm),
-  },
-  {
-    path: 'users/:id',
-    title: 'User details | Core Banking',
-    canActivate: [staffGuard],
-    loadComponent: () =>
-      import('./features/users/user-detail/user-detail').then((m) => m.UserDetail),
-  },
-  {
-    path: 'users/:id/edit',
-    title: 'Edit user | Core Banking',
-    canActivate: [staffGuard],
-    data: { permission: PERMISSIONS.edit },
-    loadComponent: () => import('./features/users/user-form/user-form').then((m) => m.UserForm),
-  },
-  {
-    path: 'accounts/new',
-    title: 'New account | Core Banking',
-    canActivate: [staffGuard],
-    data: { permission: PERMISSIONS.add },
-    loadComponent: () =>
-      import('./features/accounts/account-create/account-create').then((m) => m.AccountCreate),
-  },
-  {
-    path: 'customers/new',
-    title: 'New customer | Core Banking',
-    canActivate: [staffGuard],
-    data: { permission: PERMISSIONS.add },
-    loadComponent: () =>
-      import('./features/customers/customer-create/customer-create').then((m) => m.CustomerCreate),
-  },
-  {
-    path: 'home',
-    title: 'Home | Core Banking',
+    // Signed-in area: every child renders inside the sidebar/topbar layout.
+    path: '',
     canActivate: [authGuard],
-    loadComponent: () => import('./features/home/home').then((m) => m.Home),
+    loadComponent: () => import('./layout/shell/shell').then((m) => m.Shell),
+    children: [
+      {
+        path: 'home',
+        title: 'Dashboard | Core Banking',
+        loadComponent: () => import('./features/home/home').then((m) => m.Home),
+      },
+      {
+        path: 'users',
+        title: 'Users | Core Banking',
+        canActivate: [staffGuard],
+        loadComponent: () =>
+          import('./features/users/user-list/user-list').then((m) => m.UserList),
+      },
+      {
+        path: 'users/new',
+        title: 'New user | Core Banking',
+        canActivate: [staffGuard],
+        data: { permission: PERMISSIONS.add },
+        loadComponent: () =>
+          import('./features/users/user-form/user-form').then((m) => m.UserForm),
+      },
+      {
+        path: 'users/:id',
+        title: 'User details | Core Banking',
+        canActivate: [staffGuard],
+        loadComponent: () =>
+          import('./features/users/user-detail/user-detail').then((m) => m.UserDetail),
+      },
+      {
+        path: 'users/:id/edit',
+        title: 'Edit user | Core Banking',
+        canActivate: [staffGuard],
+        data: { permission: PERMISSIONS.edit },
+        loadComponent: () =>
+          import('./features/users/user-form/user-form').then((m) => m.UserForm),
+      },
+      {
+        path: 'accounts/new',
+        title: 'New account | Core Banking',
+        canActivate: [staffGuard],
+        data: { permission: PERMISSIONS.add },
+        loadComponent: () =>
+          import('./features/accounts/account-create/account-create').then(
+            (m) => m.AccountCreate,
+          ),
+      },
+      {
+        path: 'customers/new',
+        title: 'New customer | Core Banking',
+        canActivate: [staffGuard],
+        data: { permission: PERMISSIONS.add },
+        loadComponent: () =>
+          import('./features/customers/customer-create/customer-create').then(
+            (m) => m.CustomerCreate,
+          ),
+      },
+    ],
   },
   { path: '**', redirectTo: 'home' },
 ];

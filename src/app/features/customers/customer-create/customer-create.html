@@ -1,142 +1,150 @@
-<main class="users-page">
-  <section
-    class="users-page__card users-page__card--narrow"
-    aria-labelledby="customer-create-title"
-  >
-    <header class="users-page__header">
-      <div>
-        <h1 id="customer-create-title">New customer</h1>
-        <p>Add the customer's details and at least one address.</p>
-      </div>
-    </header>
+<div class="page">
+  <header class="page-header">
+    <div>
+      <span class="page-header__eyebrow">Operations</span>
+      <h1 id="customer-create-title">New customer</h1>
+      <p>Add the customer's details and at least one address.</p>
+    </div>
+  </header>
 
-    @if (errorMessage(); as message) {
-      <div class="auth-alert" role="alert">{{ message }}</div>
-    }
-    @if (created(); as customer) {
-      <p class="status" role="status">
+  @if (errorMessage(); as message) {
+    <div class="alert" role="alert">{{ message }}</div>
+  }
+  @if (created(); as customer) {
+    <div class="alert alert--success" role="status">
+      <app-icon name="check" />
+      <span>
         {{ customer.firstName }} {{ customer.lastName }} created. Customer ID:
-        {{ customer.customerId }}
-      </p>
-    }
+        <span class="mono">{{ customer.customerId }}</span>
+      </span>
+    </div>
+  }
 
-    <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
-      <div class="field">
-        <label for="firstName">First name</label>
-        <input
-          id="firstName"
-          type="text"
-          autocomplete="off"
-          formControlName="firstName"
-          [attr.aria-invalid]="form.controls.firstName.touched && form.controls.firstName.invalid"
-          aria-describedby="firstName-error"
-        />
-        @if (errorFor(form.controls.firstName); as message) {
-          <small id="firstName-error" class="field__error">{{ message }}</small>
-        }
-      </div>
-
-      <div class="field">
-        <label for="lastName">Last name</label>
-        <input
-          id="lastName"
-          type="text"
-          autocomplete="off"
-          formControlName="lastName"
-          [attr.aria-invalid]="form.controls.lastName.touched && form.controls.lastName.invalid"
-          aria-describedby="lastName-error"
-        />
-        @if (errorFor(form.controls.lastName); as message) {
-          <small id="lastName-error" class="field__error">{{ message }}</small>
-        }
-      </div>
-
-      <div class="field">
-        <label for="email">Email</label>
-        <input
-          id="email"
-          type="email"
-          autocomplete="off"
-          formControlName="email"
-          [attr.aria-invalid]="form.controls.email.touched && form.controls.email.invalid"
-          aria-describedby="email-error"
-        />
-        @if (errorFor(form.controls.email); as message) {
-          <small id="email-error" class="field__error">{{ message }}</small>
-        }
-      </div>
-
-      <div class="field">
-        <label for="phoneNumber">Phone number</label>
-        <input
-          id="phoneNumber"
-          type="tel"
-          autocomplete="off"
-          formControlName="phoneNumber"
-          [attr.aria-invalid]="
-            form.controls.phoneNumber.touched && form.controls.phoneNumber.invalid
-          "
-          aria-describedby="phoneNumber-error"
-        />
-        @if (errorFor(form.controls.phoneNumber); as message) {
-          <small id="phoneNumber-error" class="field__error">{{ message }}</small>
-        }
-      </div>
-
-      <div class="field">
-        <label for="nationalId">National ID</label>
-        <input
-          id="nationalId"
-          type="text"
-          autocomplete="off"
-          formControlName="nationalId"
-          [attr.aria-invalid]="form.controls.nationalId.touched && form.controls.nationalId.invalid"
-          aria-describedby="nationalId-error"
-        />
-        @if (errorFor(form.controls.nationalId); as message) {
-          <small id="nationalId-error" class="field__error">{{ message }}</small>
-        }
-      </div>
-
-      <div class="field">
-        <label for="dateOfBirth">Date of birth</label>
-        <input
-          id="dateOfBirth"
-          type="date"
-          formControlName="dateOfBirth"
-          [attr.aria-invalid]="
-            form.controls.dateOfBirth.touched && form.controls.dateOfBirth.invalid
-          "
-          aria-describedby="dateOfBirth-error"
-        />
-        @if (errorFor(form.controls.dateOfBirth); as message) {
-          <small id="dateOfBirth-error" class="field__error">{{ message }}</small>
-        }
-      </div>
-
-      <div class="field">
-        <label for="status">Status</label>
-        <select id="status" formControlName="status">
-          @for (status of statuses; track status) {
-            <option [value]="status">{{ status }}</option>
+  <form [formGroup]="form" (ngSubmit)="submit()" novalidate aria-labelledby="customer-create-title">
+    <section class="card card__body">
+      <h2 class="section-title">Personal details</h2>
+      <div class="form-grid">
+        <div class="field">
+          <label for="firstName">First name</label>
+          <input
+            id="firstName"
+            type="text"
+            autocomplete="off"
+            formControlName="firstName"
+            [attr.aria-invalid]="form.controls.firstName.touched && form.controls.firstName.invalid"
+            aria-describedby="firstName-error"
+          />
+          @if (errorFor(form.controls.firstName); as message) {
+            <small id="firstName-error" class="field__error">{{ message }}</small>
           }
-        </select>
+        </div>
+
+        <div class="field">
+          <label for="lastName">Last name</label>
+          <input
+            id="lastName"
+            type="text"
+            autocomplete="off"
+            formControlName="lastName"
+            [attr.aria-invalid]="form.controls.lastName.touched && form.controls.lastName.invalid"
+            aria-describedby="lastName-error"
+          />
+          @if (errorFor(form.controls.lastName); as message) {
+            <small id="lastName-error" class="field__error">{{ message }}</small>
+          }
+        </div>
+
+        <div class="field">
+          <label for="email">Email</label>
+          <input
+            id="email"
+            type="email"
+            autocomplete="off"
+            formControlName="email"
+            [attr.aria-invalid]="form.controls.email.touched && form.controls.email.invalid"
+            aria-describedby="email-error"
+          />
+          @if (errorFor(form.controls.email); as message) {
+            <small id="email-error" class="field__error">{{ message }}</small>
+          }
+        </div>
+
+        <div class="field">
+          <label for="phoneNumber">Phone number</label>
+          <input
+            id="phoneNumber"
+            type="tel"
+            autocomplete="off"
+            formControlName="phoneNumber"
+            [attr.aria-invalid]="form.controls.phoneNumber.touched && form.controls.phoneNumber.invalid"
+            aria-describedby="phoneNumber-error"
+          />
+          @if (errorFor(form.controls.phoneNumber); as message) {
+            <small id="phoneNumber-error" class="field__error">{{ message }}</small>
+          }
+        </div>
+
+        <div class="field">
+          <label for="nationalId">National ID</label>
+          <input
+            id="nationalId"
+            type="text"
+            autocomplete="off"
+            formControlName="nationalId"
+            [attr.aria-invalid]="form.controls.nationalId.touched && form.controls.nationalId.invalid"
+            aria-describedby="nationalId-error"
+          />
+          @if (errorFor(form.controls.nationalId); as message) {
+            <small id="nationalId-error" class="field__error">{{ message }}</small>
+          }
+        </div>
+
+        <div class="field">
+          <label for="dateOfBirth">Date of birth</label>
+          <input
+            id="dateOfBirth"
+            type="date"
+            formControlName="dateOfBirth"
+            [attr.aria-invalid]="form.controls.dateOfBirth.touched && form.controls.dateOfBirth.invalid"
+            aria-describedby="dateOfBirth-error"
+          />
+          @if (errorFor(form.controls.dateOfBirth); as message) {
+            <small id="dateOfBirth-error" class="field__error">{{ message }}</small>
+          }
+        </div>
+
+        <div class="field">
+          <label for="status">Status</label>
+          <select id="status" formControlName="status">
+            @for (status of statuses; track status) {
+              <option [value]="status">{{ status }}</option>
+            }
+          </select>
+        </div>
       </div>
+    </section>
 
-      <fieldset class="customer-create__addresses" formArrayName="addresses">
-        <legend>Addresses</legend>
+    <section class="card card__body customer-create__addresses" formArrayName="addresses">
+      <h2 class="section-title">Addresses</h2>
 
-        @for (group of addresses.controls; track $index; let i = $index) {
-          <div class="customer-create__address" [formGroupName]="i">
-            <div class="customer-create__address-head">
-              <strong>Address {{ i + 1 }}</strong>
-              @if (addresses.length > 1) {
-                <button type="button" class="button button--secondary" (click)="removeAddress(i)">
-                  Remove
-                </button>
-              }
-            </div>
+      @for (group of addresses.controls; track $index; let i = $index) {
+        <fieldset class="customer-create__address" [formGroupName]="i">
+          <legend class="visually-hidden">Address {{ i + 1 }}</legend>
+          <div class="customer-create__address-head">
+            <strong aria-hidden="true">Address {{ i + 1 }}</strong>
+            @if (addresses.length > 1) {
+              <button
+                type="button"
+                class="button button--secondary button--sm"
+                [attr.aria-label]="'Remove address ' + (i + 1)"
+                (click)="removeAddress(i)"
+              >
+                Remove
+              </button>
+            }
+          </div>
 
+          <div class="form-grid">
             @for (field of addressTextFields; track field.name) {
               <div class="field">
                 <label [attr.for]="'address-' + i + '-' + field.name">{{ field.label }}</label>
@@ -145,15 +153,11 @@
                   type="text"
                   autocomplete="off"
                   [formControlName]="field.name"
-                  [attr.aria-invalid]="
-                    group.controls[field.name].touched && group.controls[field.name].invalid
-                  "
+                  [attr.aria-invalid]="group.controls[field.name].touched && group.controls[field.name].invalid"
                   [attr.aria-describedby]="'address-' + i + '-' + field.name + '-error'"
                 />
                 @if (errorFor(group.controls[field.name]); as message) {
-                  <small [id]="'address-' + i + '-' + field.name + '-error'" class="field__error">{{
-                    message
-                  }}</small>
+                  <small [id]="'address-' + i + '-' + field.name + '-error'" class="field__error">{{ message }}</small>
                 }
               </div>
             }
@@ -167,23 +171,20 @@
               </select>
             </div>
           </div>
-        }
+        </fieldset>
+      }
 
-        <button
-          type="button"
-          class="button button--secondary customer-create__add"
-          (click)="addAddress()"
-        >
-          Add address
-        </button>
-      </fieldset>
+      <button type="button" class="button button--secondary customer-create__add" (click)="addAddress()">
+        <app-icon name="plus" [size]="16" />
+        Add address
+      </button>
+    </section>
 
-      <div class="form-actions">
-        <a class="button button--secondary" routerLink="/">Cancel</a>
-        <button type="submit" class="auth-submit" [disabled]="submitting()">
-          {{ submitting() ? 'Creating…' : 'Create customer' }}
-        </button>
-      </div>
-    </form>
-  </section>
-</main>
+    <div class="form-actions">
+      <a class="button button--secondary" routerLink="/home">Cancel</a>
+      <button type="submit" class="button" [disabled]="submitting()">
+        {{ submitting() ? 'Creating…' : 'Create customer' }}
+      </button>
+    </div>
+  </form>
+</div>

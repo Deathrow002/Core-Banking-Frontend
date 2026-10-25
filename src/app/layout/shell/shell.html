@@ -1,0 +1,73 @@
+<div class="shell" [class.shell--nav-open]="navOpen()">
+  <aside class="sidebar" id="primary-nav" aria-label="Primary">
+    <div class="sidebar__brand">
+      <a routerLink="/home" aria-label="Core Banking dashboard">
+        <app-brand-logo tone="dark" [size]="46" />
+      </a>
+      <button type="button" class="sidebar__close" aria-label="Close menu" (click)="navOpen.set(false)">
+        <app-icon name="close" />
+      </button>
+    </div>
+
+    <nav class="sidebar__nav">
+      @for (section of sections(); track section.title) {
+        <p class="sidebar__section">{{ section.title }}</p>
+        <ul>
+          @for (item of section.items; track item.link) {
+            <li>
+              <a
+                class="sidebar__link"
+                [routerLink]="item.link"
+                routerLinkActive="sidebar__link--active"
+                ariaCurrentWhenActive="page"
+                [routerLinkActiveOptions]="{ exact: !!item.exact }"
+              >
+                <app-icon [name]="item.icon" />
+                <span>{{ item.label }}</span>
+              </a>
+            </li>
+          }
+        </ul>
+      }
+    </nav>
+
+    <div class="sidebar__footer">
+      <app-icon name="shield" [size]="16" />
+      <span>Session secured by server-side authentication</span>
+    </div>
+  </aside>
+
+  <div class="shell__backdrop" aria-hidden="true" (click)="navOpen.set(false)"></div>
+
+  <div class="shell__main">
+    <header class="topbar">
+      <button
+        type="button"
+        class="topbar__menu"
+        aria-controls="primary-nav"
+        [attr.aria-expanded]="navOpen()"
+        aria-label="Toggle navigation"
+        (click)="toggleNav()"
+      >
+        <app-icon name="menu" [size]="20" />
+      </button>
+      <span class="topbar__title">{{ pageTitle() }}</span>
+
+      <div class="topbar__user">
+        <span class="avatar" aria-hidden="true">{{ initials() }}</span>
+        <span class="topbar__identity">
+          <strong>{{ auth.currentUser() }}</strong>
+          <small>{{ roleLabel() }}</small>
+        </span>
+        <button type="button" class="button button--secondary button--sm" (click)="logout()">
+          <app-icon name="logout" [size]="16" />
+          <span>Sign out</span>
+        </button>
+      </div>
+    </header>
+
+    <main class="content" id="main-content">
+      <router-outlet />
+    </main>
+  </div>
+</div>

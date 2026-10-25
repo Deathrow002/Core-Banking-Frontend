@@ -110,7 +110,7 @@ describe('AccountCreate', () => {
   it('asks for a customer before submitting', () => {
     submitForm();
 
-    expect(el.querySelector('.auth-alert')?.textContent).toContain('Select a customer');
+    expect(el.querySelector('.alert')?.textContent).toContain('Select a customer');
     http.expectNone('/accounts/createAccount');
   });
 
@@ -138,7 +138,7 @@ describe('AccountCreate', () => {
     );
     fixture.detectChanges();
 
-    expect(el.querySelector('.status')?.textContent).toContain('a1');
+    expect(el.querySelector('[role=status]')?.textContent).toContain('a1');
     expect(el.querySelector('.account-create__selected')).toBeNull();
   });
 
@@ -155,7 +155,7 @@ describe('AccountCreate', () => {
       );
     fixture.detectChanges();
 
-    expect(el.querySelector('.auth-alert')?.textContent).toContain('Customer ID does not exist');
+    expect(el.querySelector('.alert')?.textContent).toContain('Customer ID does not exist');
     expect(el.querySelector('.account-create__selected')).not.toBeNull();
   });
 });

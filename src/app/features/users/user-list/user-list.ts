@@ -9,10 +9,11 @@ import {
   toUserErrorMessage,
   UserManagementService,
 } from '../../../core/users/user-management.service';
+import { Icon } from '../../../shared/icon/icon';
 
 @Component({
   selector: 'app-user-list',
-  imports: [DatePipe, RouterLink],
+  imports: [DatePipe, RouterLink, Icon],
   templateUrl: './user-list.html',
   styleUrl: './user-list.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

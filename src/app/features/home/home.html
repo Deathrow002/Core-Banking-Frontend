@@ -1,0 +1,82 @@
+<div class="page">
+  <section class="hero" aria-labelledby="home-title">
+    <div>
+      <span class="hero__date">{{ today | date: 'fullDate' }}</span>
+      <h1 id="home-title">{{ greeting }}, {{ auth.currentUser() }}</h1>
+      <p>Welcome to the Core Banking administration console.</p>
+      @if (roleNames().length) {
+        <ul class="hero__roles" aria-label="Your roles">
+          @for (role of roleNames(); track role) {
+            <li>{{ role }}</li>
+          }
+        </ul>
+      }
+    </div>
+    <app-icon class="hero__mark" name="bank" [size]="120" />
+  </section>
+
+  <div class="stats">
+    @if (auth.isStaff()) {
+      <article class="card stat">
+        <span class="stat__icon"><app-icon name="users" [size]="22" /></span>
+        <div>
+          <span class="stat__label">Registered users</span>
+          <strong class="stat__value">{{ userCount() ?? '—' }}</strong>
+        </div>
+      </article>
+    }
+    <article class="card stat">
+      <span class="stat__icon stat__icon--accent"><app-icon name="shield" [size]="22" /></span>
+      <div>
+        <span class="stat__label">Access level</span>
+        <strong class="stat__value">{{ auth.isStaff() ? 'Staff' : 'Standard' }}</strong>
+      </div>
+    </article>
+    <article class="card stat">
+      <span class="stat__icon"><app-icon name="check" [size]="22" /></span>
+      <div>
+        <span class="stat__label">Permissions granted</span>
+        <strong class="stat__value">{{ grantedCount() }} / {{ access().length }}</strong>
+      </div>
+    </article>
+  </div>
+
+  <div class="layout">
+    <section aria-labelledby="actions-title">
+      <h2 id="actions-title" class="section-title">Quick actions</h2>
+      @if (actions().length) {
+        <nav class="actions" aria-label="Staff tools">
+          @for (action of actions(); track action.link) {
+            <a class="card action" [routerLink]="action.link">
+              <span class="action__icon"><app-icon [name]="action.icon" [size]="22" /></span>
+              <span class="action__text">
+                <strong>{{ action.title }}</strong>
+                <small>{{ action.description }}</small>
+              </span>
+              <app-icon class="action__chevron" name="chevron-right" />
+            </a>
+          }
+        </nav>
+      } @else {
+        <div class="card card__body empty">
+          Administrative tools are available to managers and administrators.
+        </div>
+      }
+    </section>
+
+    <section class="card" aria-labelledby="access-title">
+      <header class="card__header">
+        <h2 id="access-title">Your access</h2>
+      </header>
+      <ul class="access">
+        @for (entry of access(); track entry.label) {
+          <li [class.access--denied]="!entry.granted">
+            <app-icon [name]="entry.granted ? 'check' : 'close'" [size]="16" />
+            <span>{{ entry.label }}</span>
+            <small>{{ entry.granted ? 'Allowed' : 'Not allowed' }}</small>
+          </li>
+        }
+      </ul>
+    </section>
+  </div>
+</div>

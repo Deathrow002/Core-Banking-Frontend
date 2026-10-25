@@ -28,16 +28,25 @@ To run any other Angular CLI command, use `npm run ng -- <command>`.
 ## Project structure
 
 ```text
-src/app/
-├── core/              Shared code used across features
-│   ├── auth/          Auth service, route guard, HTTP interceptor, models, form validators
-│   └── users/         User management API service
-├── features/          Screens, grouped by feature
-│   ├── auth/          Login page
-│   ├── home/          Home page
-│   └── users/         User list, detail, and form pages
-├── app.config.ts      Application providers
-└── app.routes.ts      Route definitions
+src/
+├── styles.scss        Global entry; loads the design system below
+├── styles/            Design tokens (navy/crimson palette, type), base and shared UI classes
+└── app/
+    ├── core/          Shared code used across features
+    │   ├── accounts/  Account API service
+    │   ├── auth/      Auth service, route guard, HTTP interceptor, models, form validators
+    │   ├── customers/ Customer API service
+    │   └── users/     User management API service
+    ├── layout/shell/  Signed-in layout: sidebar navigation, top bar, sign out
+    ├── shared/        Brand seal logo and inline icon set
+    ├── features/      Screens, grouped by feature
+    │   ├── accounts/  Open account page
+    │   ├── auth/      Login page
+    │   ├── customers/ New customer page
+    │   ├── home/      Dashboard
+    │   └── users/     User list, detail, and form pages
+    ├── app.config.ts  Application providers
+    └── app.routes.ts  Route definitions (signed-in pages are children of the shell)
 ```
 
 ## Default admin login (local development)

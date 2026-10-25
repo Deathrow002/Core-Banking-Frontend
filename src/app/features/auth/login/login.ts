@@ -4,10 +4,12 @@ import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angula
 import { ActivatedRoute, Router } from '@angular/router';
 import { finalize } from 'rxjs';
 import { AuthService } from '../../../core/auth/auth.service';
+import { BrandLogo } from '../../../shared/brand-logo/brand-logo';
+import { Icon } from '../../../shared/icon/icon';
 
 @Component({
   selector: 'app-login',
-  imports: [ReactiveFormsModule],
+  imports: [ReactiveFormsModule, BrandLogo, Icon],
   templateUrl: './login.html',
   styleUrl: './login.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -22,6 +24,7 @@ export class Login {
     password: ['', [Validators.required]],
   });
 
+  protected readonly year = new Date().getFullYear();
   protected readonly submitting = signal(false);
   protected readonly errorMessage = signal<string | null>(null);
   protected readonly showPassword = signal(false);

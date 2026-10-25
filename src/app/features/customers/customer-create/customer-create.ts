@@ -19,6 +19,7 @@ import {
   CustomerService,
   toCustomerCreateErrorMessage,
 } from '../../../core/customers/customer.service';
+import { Icon } from '../../../shared/icon/icon';
 
 const DEFAULT_STATUS: CustomerStatus = 'Active';
 const DEFAULT_ADDRESS_TYPE: AddressType = 'Present';
@@ -47,7 +48,7 @@ function createAddressGroup(fb: NonNullableFormBuilder) {
 
 @Component({
   selector: 'app-customer-create',
-  imports: [ReactiveFormsModule, RouterLink],
+  imports: [ReactiveFormsModule, RouterLink, Icon],
   templateUrl: './customer-create.html',
   styleUrl: './customer-create.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

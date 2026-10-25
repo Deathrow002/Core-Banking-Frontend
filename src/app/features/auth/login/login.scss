@@ -1,5 +1,137 @@
-@use '../auth-form';
-
 :host {
   display: block;
+}
+
+.login {
+  display: grid;
+  grid-template-columns: minmax(360px, 5fr) 7fr;
+  min-height: 100vh;
+
+  &__brand {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 2.5rem;
+    overflow: hidden;
+    padding: 2.5rem 3rem;
+    background:
+      radial-gradient(circle at 110% -10%, rgb(255 255 255 / 10%) 0 30%, transparent 31%),
+      radial-gradient(circle at -20% 120%, rgb(147 34 42 / 35%) 0 35%, transparent 36%),
+      linear-gradient(160deg, var(--navy-800) 0%, var(--navy-950) 100%);
+    color: var(--navy-100);
+    font-size: 1.05rem;
+  }
+
+  &__pitch {
+    max-width: 420px;
+
+    h2 {
+      margin-bottom: 0.75rem;
+      color: var(--white);
+      font-size: 2rem;
+    }
+
+    p {
+      margin: 0 0 1.75rem;
+      font-size: 0.95rem;
+    }
+
+    ul {
+      display: grid;
+      gap: 0.9rem;
+      margin: 0;
+      padding: 0;
+      font-size: 0.9rem;
+      list-style: none;
+    }
+
+    li {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    app-icon {
+      display: grid;
+      place-items: center;
+      width: 34px;
+      height: 34px;
+      border: 1px solid rgb(255 255 255 / 25%);
+      border-radius: 50%;
+      color: #f3b4b7;
+    }
+  }
+
+  &__legal {
+    color: rgb(198 216 229 / 60%);
+    font-size: 0.75rem;
+  }
+
+  &__main {
+    display: grid;
+    place-items: center;
+    padding: 2rem 1.5rem;
+    background: var(--gray-50);
+  }
+
+  &__card {
+    width: 100%;
+    max-width: 420px;
+    padding: 2.5rem 2.25rem;
+    border: 1px solid var(--gray-200);
+    border-top: 4px solid var(--crimson-700);
+    border-radius: var(--radius-lg);
+    background: var(--white);
+    box-shadow: var(--shadow);
+  }
+
+  &__header {
+    margin-bottom: 1.75rem;
+
+    h1 {
+      font-size: 1.6rem;
+    }
+
+    p {
+      margin: 0.4rem 0 0;
+      color: var(--gray-600);
+      font-size: 0.9rem;
+    }
+  }
+
+  &__mobile-logo {
+    display: none !important;
+    margin-bottom: 1rem;
+  }
+
+  &__submit {
+    min-height: 46px;
+    margin-top: 0.5rem;
+    font-size: 1rem;
+  }
+
+  &__note {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    margin: 1.5rem 0 0;
+    color: var(--gray-500);
+    font-size: 0.78rem;
+  }
+}
+
+@media (max-width: 860px) {
+  .login {
+    grid-template-columns: 1fr;
+
+    &__brand {
+      display: none;
+    }
+
+    &__mobile-logo {
+      display: inline-flex !important;
+    }
+  }
 }

@@ -1,38 +1,35 @@
-@use '../../auth/auth-form';
-@use '../../users/users';
+:host {
+  display: block;
+}
+
+.card + .card {
+  margin-top: 1.25rem;
+}
+
+.form-actions {
+  border-top: 0;
+}
 
 .customer-create {
-  &__addresses {
-    margin: 0 0 1rem;
-    padding: 0.75rem;
-    border: 1px solid #c9d1d9;
-    border-radius: 6px;
-
-    legend {
-      font-weight: 600;
-      padding: 0 0.25rem;
-    }
-  }
-
   &__address {
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
-
-    & + & {
-      margin-top: 1rem;
-      padding-top: 1rem;
-      border-top: 1px solid #e5e9ee;
-    }
+    min-width: 0;
+    margin: 0 0 1rem;
+    padding: 1rem 1.25rem 0.25rem;
+    border: 1px solid var(--gray-200);
+    border-radius: var(--radius);
+    background: var(--gray-50);
   }
 
   &__address-head {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 0.75rem;
+    color: var(--navy-800);
   }
 
   &__add {
-    margin-top: 1rem;
+    margin-top: 0.25rem;
   }
 }

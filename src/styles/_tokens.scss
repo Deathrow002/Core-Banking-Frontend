@@ -1,0 +1,43 @@
+// Brand palette: deep navy seal + crimson accent, serif display type.
+:root {
+  --navy-950: #071f2f;
+  --navy-900: #0b2f45;
+  --navy-800: #0f3e5b;
+  --navy-700: #144f73;
+  --navy-600: #1d6690;
+  --navy-100: #dbe8f1;
+  --navy-50: #eef4f8;
+
+  --crimson-700: #7a1418;
+  --crimson-600: #93222a;
+  --crimson-50: #fbeeee;
+
+  --gray-900: #172331;
+  --gray-700: #3a4a5c;
+  --gray-600: #56677a;
+  --gray-500: #7a8899;
+  --gray-300: #c8d2dc;
+  --gray-200: #e1e7ee;
+  --gray-100: #eef2f6;
+  --gray-50: #f6f8fb;
+  --white: #fff;
+
+  --success-700: #1c6b3e;
+  --success-50: #e7f5ec;
+  --danger-700: #b3261e;
+  --danger-50: #fdecea;
+
+  --font-sans: 'Segoe UI', 'Inter', system-ui, -apple-system, Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --font-serif: Georgia, 'Times New Roman', Times, serif;
+
+  --radius-sm: 6px;
+  --radius: 10px;
+  --radius-lg: 14px;
+  --shadow-sm: 0 1px 2px rgb(11 47 69 / 6%), 0 1px 3px rgb(11 47 69 / 8%);
+  --shadow: 0 4px 12px rgb(11 47 69 / 8%), 0 1px 3px rgb(11 47 69 / 6%);
+  --shadow-lg: 0 24px 48px rgb(7 31 47 / 22%);
+  --focus-ring: 0 0 0 3px rgb(29 102 144 / 28%);
+
+  --sidebar-width: 264px;
+  --topbar-height: 64px;
+}

@@ -1,71 +1,86 @@
-<main class="users-page">
-  <section class="users-page__card users-page__card--narrow" aria-labelledby="user-detail-title">
-    <header class="users-page__header">
-      <div>
-        <h1 id="user-detail-title">User details</h1>
-        <p><a routerLink="/users">Back to users</a></p>
-      </div>
-    </header>
+<div class="page page--narrow">
+  <header class="page-header">
+    <div>
+      <nav class="breadcrumb" aria-label="Breadcrumb">
+        <a routerLink="/users">Users</a>
+        <app-icon name="chevron-right" [size]="14" />
+        <span aria-current="page">Details</span>
+      </nav>
+      <h1 id="user-detail-title">User details</h1>
+    </div>
+  </header>
 
-    @if (errorMessage(); as message) {
-      <div class="auth-alert" role="alert">{{ message }}</div>
-    }
+  @if (errorMessage(); as message) {
+    <div class="alert" role="alert">{{ message }}</div>
+  }
 
+  <section class="card" aria-labelledby="user-detail-title">
     @if (loading()) {
-      <p class="hint" aria-live="polite">Loading user…</p>
+      <p class="card__body hint" aria-live="polite">Loading user…</p>
     } @else if (user(); as user) {
-      <dl class="detail-list">
-        <dt>Email</dt>
-        <dd>
-          {{ user.email }}
-          @if (isSelf()) {
-            <span class="badge">You</span>
-          }
-        </dd>
+      <header class="card__header profile">
+        <span class="avatar avatar--lg" aria-hidden="true">{{ user.email.slice(0, 2) }}</span>
+        <div class="profile__name">
+          <h2>
+            {{ user.email }}
+            @if (isSelf()) {
+              <span class="badge">You</span>
+            }
+          </h2>
+          <small>Login account</small>
+        </div>
+      </header>
 
-        <dt>Customer ID</dt>
-        <dd>{{ user.customerId }}</dd>
+      <div class="card__body">
+        <dl class="detail-list">
+          <dt>Email</dt>
+          <dd>{{ user.email }}</dd>
 
-        <dt>Role</dt>
-        <dd>{{ user.role }}</dd>
+          <dt>Customer ID</dt>
+          <dd class="mono">{{ user.customerId }}</dd>
 
-        <dt>Status</dt>
-        <dd>
-          <span class="status" [class.status--off]="!user.enabled">
-            {{ user.enabled ? 'Active' : 'Disabled' }}
-          </span>
-        </dd>
+          <dt>Role</dt>
+          <dd><span class="badge badge--role">{{ user.role }}</span></dd>
 
-        <dt>Created</dt>
-        <dd>{{ user.createdAt | date: 'medium' }}</dd>
-      </dl>
+          <dt>Status</dt>
+          <dd>
+            <span class="status" [class.status--off]="!user.enabled">
+              {{ user.enabled ? 'Active' : 'Disabled' }}
+            </span>
+          </dd>
 
-      <div class="form-actions">
-        @if (confirmingDelete()) {
-          <span>Delete this user permanently?</span>
-          <button type="button" class="button button--secondary" [disabled]="deleting()" (click)="confirmingDelete.set(false)">
-            Cancel
-          </button>
-          <button type="button" class="button button--danger" [disabled]="deleting()" (click)="confirmDelete()">
-            {{ deleting() ? 'Deleting…' : 'Confirm delete' }}
-          </button>
-        } @else {
-          @if (canDelete) {
-            <button
-              type="button"
-              class="button button--secondary"
-              [disabled]="isSelf()"
-              [attr.title]="isSelf() ? 'You cannot delete your own account.' : null"
-              (click)="confirmingDelete.set(true)"
-            >
-              Delete
+          <dt>Created</dt>
+          <dd>{{ user.createdAt | date: 'medium' }}</dd>
+        </dl>
+
+        <div class="form-actions">
+          @if (confirmingDelete()) {
+            <span class="form-actions__note">Delete this user permanently?</span>
+            <button type="button" class="button button--secondary" [disabled]="deleting()" (click)="confirmingDelete.set(false)">
+              Cancel
             </button>
+            <button type="button" class="button button--danger" [disabled]="deleting()" (click)="confirmDelete()">
+              {{ deleting() ? 'Deleting…' : 'Confirm delete' }}
+            </button>
+          } @else {
+            <a class="button button--secondary" routerLink="/users">Back to users</a>
+            @if (canDelete) {
+              <button
+                type="button"
+                class="button button--secondary"
+                [disabled]="isSelf()"
+                [attr.title]="isSelf() ? 'You cannot delete your own account.' : null"
+                (click)="confirmingDelete.set(true)"
+              >
+                Delete
+              </button>
+            }
+            @if (canEdit) {
+              <a class="button" [routerLink]="['/users', user.id, 'edit']">Edit</a>
+            }
           }
-          @if (canEdit) {
-            <a class="button" [routerLink]="['/users', user.id, 'edit']">Edit</a>
-          }
-        }
+        </div>
       </div>
     }
   </section>
-</main>
+</div>

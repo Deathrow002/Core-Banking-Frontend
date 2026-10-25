@@ -5,10 +5,11 @@ import { finalize } from 'rxjs';
 import { ManagedUser, PERMISSIONS } from '../../../core/auth/auth.models';
 import { AuthService } from '../../../core/auth/auth.service';
 import { toUserErrorMessage, UserManagementService } from '../../../core/users/user-management.service';
+import { Icon } from '../../../shared/icon/icon';
 
 @Component({
   selector: 'app-user-detail',
-  imports: [DatePipe, RouterLink],
+  imports: [DatePipe, RouterLink, Icon],
   templateUrl: './user-detail.html',
   styleUrl: './user-detail.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

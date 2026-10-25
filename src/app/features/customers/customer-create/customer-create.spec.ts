@@ -57,7 +57,7 @@ describe('CustomerCreate', () => {
   it('asks for the required fields before submitting', () => {
     submitForm();
 
-    expect(el.querySelector('.auth-alert')?.textContent).toContain(
+    expect(el.querySelector('.alert')?.textContent).toContain(
       'Please complete the highlighted fields.',
     );
     expect(el.querySelector('#firstName-error')?.textContent).toContain('required');
@@ -105,7 +105,7 @@ describe('CustomerCreate', () => {
     );
     fixture.detectChanges();
 
-    expect(el.querySelector('.status')?.textContent).toContain('c1');
+    expect(el.querySelector('[role=status]')?.textContent).toContain('c1');
     expect(el.querySelector<HTMLInputElement>('#firstName')?.value).toBe('');
     expect(addressBlocks().length).toBe(1);
   });
@@ -123,7 +123,7 @@ describe('CustomerCreate', () => {
       );
     fixture.detectChanges();
 
-    expect(el.querySelector('.auth-alert')?.textContent).toContain('National ID already exists');
+    expect(el.querySelector('.alert')?.textContent).toContain('National ID already exists');
     expect(el.querySelector<HTMLInputElement>('#firstName')?.value).toBe('Ada');
   });
 

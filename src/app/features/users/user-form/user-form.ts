@@ -28,6 +28,7 @@ import {
   toUserErrorMessage,
   UserManagementService,
 } from '../../../core/users/user-management.service';
+import { Icon } from '../../../shared/icon/icon';
 
 function passwordsMatch(group: AbstractControl): ValidationErrors | null {
   const password = group.get('password')?.value ?? '';
@@ -37,7 +38,7 @@ function passwordsMatch(group: AbstractControl): ValidationErrors | null {
 
 @Component({
   selector: 'app-user-form',
-  imports: [ReactiveFormsModule, RouterLink],
+  imports: [ReactiveFormsModule, RouterLink, Icon],
   templateUrl: './user-form.html',
   styleUrl: './user-form.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

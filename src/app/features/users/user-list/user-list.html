@@ -1,39 +1,40 @@
-<main class="users-page">
-  <header class="users-page__bar">
+<div class="page">
+  <header class="page-header">
     <div>
+      <span class="page-header__eyebrow">Administration</span>
       <h1>Users</h1>
       <p>Login accounts for customers, managers, and administrators.</p>
     </div>
     @if (canAdd) {
-      <a class="button" routerLink="/users/new">New user</a>
+      <a class="button" routerLink="/users/new"><app-icon name="plus" [size]="16" />New user</a>
     }
   </header>
 
-  <section class="users-page__card">
-    @if (errorMessage(); as message) {
-      <div class="auth-alert" role="alert">{{ message }}</div>
-    }
-    @if (successMessage(); as message) {
-      <div class="auth-alert auth-alert--success" role="status">{{ message }}</div>
-    }
+  @if (errorMessage(); as message) {
+    <div class="alert" role="alert">{{ message }}</div>
+  }
+  @if (successMessage(); as message) {
+    <div class="alert alert--success" role="status">{{ message }}</div>
+  }
 
-    <div class="users-toolbar">
+  <section class="card">
+    <div class="toolbar">
       <label for="page-size">Rows per page</label>
       <select id="page-size" [value]="size()" (change)="onSizeChange($event)">
         @for (option of pageSizes; track option) {
           <option [value]="option" [selected]="option === size()">{{ option }}</option>
         }
       </select>
-      <span class="users-toolbar__count" aria-live="polite">
+      <span class="toolbar__count" aria-live="polite">
         {{ loading() ? 'Loading…' : total() + ' user(s)' }}
       </span>
     </div>
 
-    <div class="users-table-wrap">
-      <table class="users-table">
+    <div class="table-wrap">
+      <table class="table">
         <thead>
           <tr>
-            <th scope="col">Email</th>
+            <th scope="col">User</th>
             <th scope="col">Role</th>
             <th scope="col">Status</th>
             <th scope="col">Created</th>
@@ -44,33 +45,38 @@
           @for (user of rows(); track user.id) {
             <tr>
               <td>
-                {{ user.email }}
-                @if (isSelf(user)) {
-                  <span class="badge">You</span>
-                }
+                <span class="user-cell">
+                  <span class="avatar" aria-hidden="true">{{ user.email.slice(0, 2) }}</span>
+                  <span>
+                    {{ user.email }}
+                    @if (isSelf(user)) {
+                      <span class="badge">You</span>
+                    }
+                  </span>
+                </span>
               </td>
-              <td>{{ user.role }}</td>
+              <td><span class="badge badge--role">{{ user.role }}</span></td>
               <td>
                 <span class="status" [class.status--off]="!user.enabled">
                   {{ user.enabled ? 'Active' : 'Disabled' }}
                 </span>
               </td>
-              <td>{{ user.createdAt | date: 'mediumDate' }}</td>
-              <td class="users-table__actions">
+              <td class="nowrap">{{ user.createdAt | date: 'mediumDate' }}</td>
+              <td class="table__actions">
                 @if (pendingDeleteId() === user.id) {
                   <button
                     type="button"
-                    class="button button--danger"
+                    class="button button--danger button--sm"
                     [disabled]="deletingId() === user.id"
                     (click)="confirmDelete(user)"
                   >
                     Confirm delete
                   </button>
-                  <button type="button" class="button button--secondary" (click)="cancelDelete()">Cancel</button>
+                  <button type="button" class="button button--secondary button--sm" (click)="cancelDelete()">Cancel</button>
                 } @else {
-                  <a [routerLink]="['/users', user.id]">View</a>
+                  <a class="link" [routerLink]="['/users', user.id]">View</a>
                   @if (canEdit) {
-                    <a [routerLink]="['/users', user.id, 'edit']">Edit</a>
+                    <a class="link" [routerLink]="['/users', user.id, 'edit']">Edit</a>
                   }
                   @if (canDelete) {
                     <button
@@ -88,7 +94,7 @@
             </tr>
           } @empty {
             <tr>
-              <td class="users-table__empty" colspan="5">
+              <td class="table__empty" colspan="5">
                 {{ loading() ? 'Loading users…' : 'No users found.' }}
               </td>
             </tr>
@@ -98,23 +104,25 @@
     </div>
 
     <nav class="pager" aria-label="Pagination">
-      <button
-        type="button"
-        class="button button--secondary"
-        [disabled]="!canPrevious() || loading()"
-        (click)="goTo(pageIndex() - 1)"
-      >
-        Previous
-      </button>
       <span>Page {{ pageIndex() + 1 }} of {{ totalPages() }}</span>
-      <button
-        type="button"
-        class="button button--secondary"
-        [disabled]="!canNext() || loading()"
-        (click)="goTo(pageIndex() + 1)"
-      >
-        Next
-      </button>
+      <span>
+        <button
+          type="button"
+          class="button button--secondary button--sm"
+          [disabled]="!canPrevious() || loading()"
+          (click)="goTo(pageIndex() - 1)"
+        >
+          Previous
+        </button>
+        <button
+          type="button"
+          class="button button--secondary button--sm"
+          [disabled]="!canNext() || loading()"
+          (click)="goTo(pageIndex() + 1)"
+        >
+          Next
+        </button>
+      </span>
     </nav>
   </section>
-</main>
+</div>

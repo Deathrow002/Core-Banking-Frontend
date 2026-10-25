@@ -1,2 +1,16 @@
-@use '../../auth/auth-form';
-@use '../users';
+:host {
+  display: block;
+}
+
+.profile {
+  justify-content: flex-start;
+
+  h2 {
+    font-size: 1.15rem;
+    word-break: break-all;
+  }
+
+  small {
+    color: var(--gray-600);
+  }
+}
